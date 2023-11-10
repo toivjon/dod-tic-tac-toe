@@ -1,6 +1,10 @@
 use std::io;
 
 fn main() {
+    show_menu()
+}
+
+fn show_menu() {
     println!("===================");
     println!("=== Tic-Tac-Toe ===");
     println!("===================");
@@ -11,7 +15,11 @@ fn main() {
 
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
-        Ok(_) => println!("input: {input}"),
+        Ok(_) => match input.trim() {
+            "1" => println!("ONE!"),
+            "2" => println!("TWO!"),
+            _ => show_menu(),
+        },
         Err(error) => println!("error: {error}"),
     }
 }
