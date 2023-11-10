@@ -1,6 +1,6 @@
 # DOD - Tic-Tac-Toe
 
-A Tic-Tac-Toe with data-oriented design.
+A Rust Tic-Tac-Toe implementation with data-oriented design.
 
 ## Requirements
 
