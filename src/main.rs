@@ -38,6 +38,6 @@ fn play(grid: [char; 9], player: char) {
     println!("------------------");
     println!("  | A | B | C |");
     println!("");
-    println!("Please enter cell (e.g. 'B2'):");
+    println!("Please enter a cell e.g. 'B2':");
     // TODO Handle input
 }
