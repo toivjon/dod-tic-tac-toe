@@ -10,8 +10,14 @@ See the [official installation instructions](https://www.rust-lang.org/tools/ins
 
 ## Running
 
-Simplest way to run the application is by executing the following command.
+Run the application by executing the following command.
 
 ```console
 cargo run --release
+```
+
+Run the tests by using the following command.
+
+```console
+cargo test
 ```
