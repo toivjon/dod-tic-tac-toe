@@ -11,5 +11,5 @@ See the [official installation instructions](https://www.rust-lang.org/tools/ins
 Simplest way to run the application is by executing the following command.
 
 ```console
-cargo run
+cargo run --release
 ```
