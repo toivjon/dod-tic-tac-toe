@@ -1,4 +1,6 @@
-use std::io;
+use std::{collections::HashMap, io};
+
+type Slot = char;
 
 pub fn show_menu() {
     println!("===================");
@@ -20,7 +22,7 @@ pub fn show_menu() {
     }
 }
 
-fn play(grid: [char; 9], player: char) {
+fn play(grid: [Slot; 9], player: char) {
     assert!(player == 'O' || player == 'X'); // TODO replace with a type.
     println!();
     println!("Current turn: {}", player);
@@ -38,11 +40,31 @@ fn play(grid: [char; 9], player: char) {
 
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
-        Ok(_) => match input.trim() {
-            "1" => play([' '; 9], 'O'),
-            "2" => println!("Bye!"),
-            _ => show_menu(),
+        Ok(_) => match input_to_slot_index(&input) {
+            Ok(_) => println!("TODO!"),
+            Err(_) => show_menu(),
         },
         Err(error) => println!("error: {error}"),
     }
+}
+
+// Get the index of the slot that corresponds to provided player input.
+fn input_to_slot_index(input: &str) -> Result<i8, &'static str> {
+    match input.trim() {
+        "A1" => Ok(0),
+        "B1" => Ok(1),
+        "C1" => Ok(2),
+        "A2" => Ok(3),
+        "B2" => Ok(4),
+        "C2" => Ok(5),
+        "A3" => Ok(6),
+        "B3" => Ok(7),
+        "C3" => Ok(8),
+        _ => Err("invalid input"),
+    }
+}
+
+// Check whether the target slot is a slot which can be occupied.
+fn is_free_slot(slot: Slot) -> bool {
+    slot == ' '
 }
