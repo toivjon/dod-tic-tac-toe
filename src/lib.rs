@@ -78,3 +78,31 @@ fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
 fn is_free_slot(slot: Slot) -> bool {
     slot == ' '
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::input_to_slot_index;
+
+    #[test]
+    fn input_to_slot_index_returns_error_for_invalid_input() {
+        assert_eq!(input_to_slot_index("").is_err(), true);
+        assert_eq!(input_to_slot_index("A0").is_err(), true);
+        assert_eq!(input_to_slot_index("A4").is_err(), true);
+        assert_eq!(input_to_slot_index("D1").is_err(), true);
+        assert_eq!(input_to_slot_index("AA").is_err(), true);
+        assert_eq!(input_to_slot_index("11").is_err(), true);
+    }
+
+    #[test]
+    fn input_to_slot_index_returns_valid_indexes() {
+        assert_eq!(input_to_slot_index("A1").unwrap(), 0);
+        assert_eq!(input_to_slot_index("B1").unwrap(), 1);
+        assert_eq!(input_to_slot_index("C1").unwrap(), 2);
+        assert_eq!(input_to_slot_index("A2").unwrap(), 3);
+        assert_eq!(input_to_slot_index("B2").unwrap(), 4);
+        assert_eq!(input_to_slot_index("C2").unwrap(), 5);
+        assert_eq!(input_to_slot_index("A3").unwrap(), 6);
+        assert_eq!(input_to_slot_index("B3").unwrap(), 7);
+        assert_eq!(input_to_slot_index("C3").unwrap(), 8);
+    }
+}
