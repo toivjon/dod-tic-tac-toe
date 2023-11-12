@@ -27,15 +27,7 @@ fn play(grid: Grid, player: char) {
     assert!(player == 'O' || player == 'X'); // TODO replace with a type.
     println!();
     println!("Current turn: {}", player);
-    println!("  | A | B | C |");
-    println!("------------------");
-    println!("1 | {} | {} | {} | 1", grid[0], grid[1], grid[2]);
-    println!("------------------");
-    println!("2 | {} | {} | {} | 2", grid[3], grid[4], grid[5]);
-    println!("------------------");
-    println!("3 | {} | {} | {} | 3", grid[6], grid[7], grid[8]);
-    println!("------------------");
-    println!("  | A | B | C |");
+    print_grid(grid);
     println!("");
     println!("Please enter a cell e.g. 'B2':");
 
@@ -48,16 +40,7 @@ fn play(grid: Grid, player: char) {
                     newGrid[val] = player;
                     if resolve_winner(newGrid).is_some() {
                         println!();
-                        println!("Current turn: {}", player);
-                        println!("  | A | B | C |");
-                        println!("------------------");
-                        println!("1 | {} | {} | {} | 1", newGrid[0], newGrid[1], newGrid[2]);
-                        println!("------------------");
-                        println!("2 | {} | {} | {} | 2", newGrid[3], newGrid[4], newGrid[5]);
-                        println!("------------------");
-                        println!("3 | {} | {} | {} | 3", newGrid[6], newGrid[7], newGrid[8]);
-                        println!("------------------");
-                        println!("  | A | B | C |");
+                        print_grid(newGrid);
                         println!("");
                         println!("Player {} wins the game! Congratulations!", player);
                     } else {
@@ -73,6 +56,19 @@ fn play(grid: Grid, player: char) {
         },
         Err(error) => println!("error: {error}"),
     }
+}
+
+// Print the provided grid into the standard output.
+fn print_grid(grid: Grid) {
+    println!("  | A | B | C |");
+    println!("------------------");
+    println!("1 | {} | {} | {} | 1", grid[0], grid[1], grid[2]);
+    println!("------------------");
+    println!("2 | {} | {} | {} | 2", grid[3], grid[4], grid[5]);
+    println!("------------------");
+    println!("3 | {} | {} | {} | 3", grid[6], grid[7], grid[8]);
+    println!("------------------");
+    println!("  | A | B | C |");
 }
 
 // Get the index of the slot that corresponds to provided player input.
