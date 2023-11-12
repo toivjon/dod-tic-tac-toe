@@ -1,6 +1,7 @@
 use std::io;
 
 type Slot = char;
+type Grid = [Slot; 9];
 
 pub fn show_menu() {
     println!("===================");
@@ -22,7 +23,7 @@ pub fn show_menu() {
     }
 }
 
-fn play(grid: [Slot; 9], player: char) {
+fn play(grid: Grid, player: char) {
     assert!(player == 'O' || player == 'X'); // TODO replace with a type.
     println!();
     println!("Current turn: {}", player);
@@ -45,10 +46,26 @@ fn play(grid: [Slot; 9], player: char) {
                 if is_free_slot(grid[val]) {
                     let mut newGrid = grid;
                     newGrid[val] = player;
-                    if player == 'O' {
-                        play(newGrid, 'X');
+                    if resolve_winner(newGrid).is_some() {
+                        println!();
+                        println!("Current turn: {}", player);
+                        println!("  | A | B | C |");
+                        println!("------------------");
+                        println!("1 | {} | {} | {} | 1", newGrid[0], newGrid[1], newGrid[2]);
+                        println!("------------------");
+                        println!("2 | {} | {} | {} | 2", newGrid[3], newGrid[4], newGrid[5]);
+                        println!("------------------");
+                        println!("3 | {} | {} | {} | 3", newGrid[6], newGrid[7], newGrid[8]);
+                        println!("------------------");
+                        println!("  | A | B | C |");
+                        println!("");
+                        println!("Player {} wins the game! Congratulations!", player);
                     } else {
-                        play(newGrid, 'O');
+                        if player == 'O' {
+                            play(newGrid, 'X');
+                        } else {
+                            play(newGrid, 'O');
+                        }
                     }
                 }
             }
@@ -72,6 +89,36 @@ fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
         "C3" => Ok(8),
         _ => Err("invalid input"),
     }
+}
+
+// Resolve whether there is a winner for the given grid.
+fn resolve_winner(grid: Grid) -> Option<char> {
+    if grid[0] != ' ' {
+        if grid[0] == grid[3] && grid[0] == grid[6] {
+            return Some(grid[0]);
+        }
+    }
+    if grid[1] != ' ' {
+        if grid[1] == grid[4] && grid[1] == grid[7] {
+            return Some(grid[1]);
+        }
+    }
+    if grid[2] != ' ' {
+        if grid[2] == grid[5] && grid[2] == grid[8] {
+            return Some(grid[2]);
+        }
+    }
+    if grid[3] != ' ' {
+        if grid[3] == grid[4] && grid[3] == grid[5] {
+            return Some(grid[3]);
+        }
+    }
+    if grid[6] != ' ' {
+        if grid[6] == grid[7] && grid[6] == grid[8] {
+            return Some(grid[6]);
+        }
+    }
+    return None;
 }
 
 // Check whether the target slot is a slot which can be occupied.
