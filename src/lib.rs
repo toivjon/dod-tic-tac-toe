@@ -90,7 +90,13 @@ fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
 // Resolve whether there is a winner for the given grid.
 fn resolve_winner(grid: Grid) -> Option<char> {
     if grid[0] != ' ' {
+        if grid[0] == grid[1] && grid[0] == grid[2] {
+            return Some(grid[0]);
+        }
         if grid[0] == grid[3] && grid[0] == grid[6] {
+            return Some(grid[0]);
+        }
+        if grid[0] == grid[4] && grid[0] == grid[8] {
             return Some(grid[0]);
         }
     }
@@ -101,6 +107,9 @@ fn resolve_winner(grid: Grid) -> Option<char> {
     }
     if grid[2] != ' ' {
         if grid[2] == grid[5] && grid[2] == grid[8] {
+            return Some(grid[2]);
+        }
+        if grid[2] == grid[4] && grid[2] == grid[6] {
             return Some(grid[2]);
         }
     }
