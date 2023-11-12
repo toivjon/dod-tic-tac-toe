@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io};
+use std::io;
 
 type Slot = char;
 
@@ -41,7 +41,17 @@ fn play(grid: [Slot; 9], player: char) {
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
         Ok(_) => match input_to_slot_index(&input) {
-            Ok(_) => println!("TODO!"),
+            Ok(val) => {
+                if is_free_slot(grid[val]) {
+                    let mut newGrid = grid;
+                    newGrid[val] = player;
+                    if player == 'O' {
+                        play(newGrid, 'X');
+                    } else {
+                        play(newGrid, 'O');
+                    }
+                }
+            }
             Err(_) => show_menu(),
         },
         Err(error) => println!("error: {error}"),
@@ -49,7 +59,7 @@ fn play(grid: [Slot; 9], player: char) {
 }
 
 // Get the index of the slot that corresponds to provided player input.
-fn input_to_slot_index(input: &str) -> Result<i8, &'static str> {
+fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
     match input.trim() {
         "A1" => Ok(0),
         "B1" => Ok(1),
