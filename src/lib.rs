@@ -36,18 +36,18 @@ fn play(grid: Grid, player: char) {
         Ok(_) => match input_to_slot_index(&input) {
             Ok(val) => {
                 if is_free_slot(grid[val]) {
-                    let mut newGrid = grid;
-                    newGrid[val] = player;
-                    if resolve_winner(newGrid).is_some() {
+                    let mut new_grid = grid;
+                    new_grid[val] = player;
+                    if resolve_winner(new_grid).is_some() {
                         println!();
-                        print_grid(newGrid);
+                        print_grid(new_grid);
                         println!("");
                         println!("Player {} wins the game! Congratulations!", player);
                     } else {
                         if player == 'O' {
-                            play(newGrid, 'X');
+                            play(new_grid, 'X');
                         } else {
-                            play(newGrid, 'O');
+                            play(new_grid, 'O');
                         }
                     }
                 }
