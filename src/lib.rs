@@ -3,6 +3,14 @@ use std::io;
 type Slot = char;
 type Grid = [Slot; 9];
 
+#[derive(PartialEq, Debug)]
+enum GameState {
+    InProgress,
+    Draw,
+    XWins,
+    OWins,
+}
+
 pub fn show_menu() {
     println!("===================");
     println!("=== Tic-Tac-Toe ===");
@@ -38,16 +46,31 @@ fn play(grid: Grid, player: char) {
                 if is_free_slot(grid[val]) {
                     let mut new_grid = grid;
                     new_grid[val] = player;
-                    if resolve_winner(new_grid).is_some() {
-                        println!();
-                        print_grid(new_grid);
-                        println!("");
-                        println!("Player {} wins the game! Congratulations!", player);
-                    } else {
-                        if player == 'O' {
-                            play(new_grid, 'X');
-                        } else {
-                            play(new_grid, 'O');
+                    match check_game_state(grid) {
+                        GameState::InProgress => {
+                            if player == 'O' {
+                                play(new_grid, 'X');
+                            } else {
+                                play(new_grid, 'O');
+                            }
+                        }
+                        GameState::OWins => {
+                            println!();
+                            print_grid(new_grid);
+                            println!("");
+                            println!("Player O wins the game! Congratulations!");
+                        }
+                        GameState::XWins => {
+                            println!();
+                            print_grid(new_grid);
+                            println!("");
+                            println!("Player X wins the game! Congratulations!");
+                        }
+                        GameState::Draw => {
+                            println!();
+                            print_grid(new_grid);
+                            println!("");
+                            println!("Game ends in a draw! Better luck next time!");
                         }
                     }
                 }
@@ -87,43 +110,70 @@ fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
     }
 }
 
-// Resolve whether there is a winner for the given grid.
-fn resolve_winner(grid: Grid) -> Option<char> {
+// Check what is the current state of the game based on the given grid.
+fn check_game_state(grid: Grid) -> GameState {
     if grid[0] != ' ' {
         if grid[0] == grid[1] && grid[0] == grid[2] {
-            return Some(grid[0]);
+            if grid[0] == 'X' {
+                return GameState::XWins;
+            }
+            return GameState::OWins;
         }
         if grid[0] == grid[3] && grid[0] == grid[6] {
-            return Some(grid[0]);
+            if grid[0] == 'X' {
+                return GameState::XWins;
+            }
+            return GameState::OWins;
         }
         if grid[0] == grid[4] && grid[0] == grid[8] {
-            return Some(grid[0]);
+            if grid[0] == 'X' {
+                return GameState::XWins;
+            }
+            return GameState::OWins;
         }
     }
     if grid[1] != ' ' {
         if grid[1] == grid[4] && grid[1] == grid[7] {
-            return Some(grid[1]);
+            if grid[1] == 'X' {
+                return GameState::XWins;
+            }
+            return GameState::OWins;
         }
     }
     if grid[2] != ' ' {
         if grid[2] == grid[5] && grid[2] == grid[8] {
-            return Some(grid[2]);
+            if grid[2] == 'X' {
+                return GameState::XWins;
+            }
+            return GameState::OWins;
         }
         if grid[2] == grid[4] && grid[2] == grid[6] {
-            return Some(grid[2]);
+            if grid[2] == 'X' {
+                return GameState::XWins;
+            }
+            return GameState::OWins;
         }
     }
     if grid[3] != ' ' {
         if grid[3] == grid[4] && grid[3] == grid[5] {
-            return Some(grid[3]);
+            if grid[3] == 'X' {
+                return GameState::XWins;
+            }
+            return GameState::OWins;
         }
     }
     if grid[6] != ' ' {
         if grid[6] == grid[7] && grid[6] == grid[8] {
-            return Some(grid[6]);
+            if grid[6] == 'X' {
+                return GameState::XWins;
+            }
+            return GameState::OWins;
         }
     }
-    return None;
+    if !grid.contains(&' ') {
+        return GameState::Draw;
+    }
+    return GameState::InProgress;
 }
 
 // Check whether the target slot is a slot which can be occupied.
@@ -133,7 +183,8 @@ fn is_free_slot(slot: Slot) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::input_to_slot_index;
+
+    use crate::{check_game_state, input_to_slot_index, GameState};
 
     #[test]
     fn input_to_slot_index_returns_error_for_invalid_input() {
@@ -156,5 +207,68 @@ mod tests {
         assert_eq!(input_to_slot_index("A3").unwrap(), 6);
         assert_eq!(input_to_slot_index("B3").unwrap(), 7);
         assert_eq!(input_to_slot_index("C3").unwrap(), 8);
+    }
+
+    #[test]
+    fn check_game_state_for_x_wins() {
+        check_game_state_for_wins('X', GameState::XWins);
+    }
+
+    #[test]
+    fn check_game_state_for_o_wins() {
+        check_game_state_for_wins('O', GameState::OWins);
+    }
+
+    fn check_game_state_for_wins(tag: char, expected_state: GameState) {
+        assert_eq!(
+            check_game_state([tag, tag, tag, ' ', ' ', ' ', ' ', ' ', ' ']),
+            expected_state
+        );
+        assert_eq!(
+            check_game_state([' ', ' ', ' ', tag, tag, tag, ' ', ' ', ' ']),
+            expected_state
+        );
+        assert_eq!(
+            check_game_state([' ', ' ', ' ', ' ', ' ', ' ', tag, tag, tag]),
+            expected_state
+        );
+        assert_eq!(
+            check_game_state([tag, ' ', ' ', tag, ' ', ' ', tag, ' ', ' ']),
+            expected_state
+        );
+        assert_eq!(
+            check_game_state([' ', tag, ' ', ' ', tag, ' ', ' ', tag, ' ']),
+            expected_state
+        );
+        assert_eq!(
+            check_game_state([' ', ' ', tag, ' ', ' ', tag, ' ', ' ', tag]),
+            expected_state
+        );
+        assert_eq!(
+            check_game_state([tag, ' ', ' ', ' ', tag, ' ', ' ', ' ', tag]),
+            expected_state
+        );
+        assert_eq!(
+            check_game_state([' ', ' ', tag, ' ', tag, ' ', tag, ' ', ' ']),
+            expected_state
+        );
+    }
+
+    #[test]
+    fn check_game_state_for_draws() {
+        assert_eq!(
+            check_game_state(['X', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O']),
+            GameState::Draw
+        )
+        // TODO Add more checks.
+    }
+
+    #[test]
+    fn check_game_state_for_in_progress() {
+        assert_eq!(
+            check_game_state([' ', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O']),
+            GameState::InProgress,
+        );
+        // TODO Add more checks.
     }
 }
