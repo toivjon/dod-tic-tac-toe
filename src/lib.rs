@@ -24,13 +24,7 @@ pub fn show_menu() {
 }
 
 fn play(grid: &Grid, player: char) {
-    assert!(player == 'O' || player == 'X'); // TODO replace with a type.
-    println!();
-    println!("Current turn: {}", player);
-    print_grid(&grid);
-    println!("");
-    println!("Please enter a cell e.g. 'B2':");
-
+    print_turn_menu(grid, player);
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
         Ok(_) => match input_to_slot_index(&input) {
@@ -38,22 +32,16 @@ fn play(grid: &Grid, player: char) {
                 if is_free_slot(grid[val]) {
                     let mut new_grid = grid.clone();
                     new_grid[val] = player;
-                    if has_win(&grid) {
-                        println!();
-                        print_grid(&new_grid);
-                        println!("");
-                        println!("Player {} wins the game! Congratulations!", player);
-                    } else if has_free(&grid) {
+                    if has_win(&new_grid) {
+                        print_victory(&grid, player);
+                    } else if has_free(&new_grid) {
                         if player == 'O' {
                             play(&new_grid, 'X');
                         } else {
                             play(&new_grid, 'O');
                         }
                     } else {
-                        println!();
-                        print_grid(&new_grid);
-                        println!("");
-                        println!("Game ends in a draw! Better luck next time!");
+                        print_draw(&new_grid);
                     }
                 }
             }
@@ -61,6 +49,15 @@ fn play(grid: &Grid, player: char) {
         },
         Err(error) => println!("error: {error}"),
     }
+}
+
+// Print the turn menu into the standard output.
+fn print_turn_menu(grid: &Grid, player: char) {
+    println!();
+    println!("Current turn: {}", player);
+    print_grid(&grid);
+    println!("");
+    println!("Please enter a cell e.g. 'B2':");
 }
 
 // Print the provided grid into the standard output.
@@ -74,6 +71,22 @@ fn print_grid(grid: &Grid) {
     println!("3 | {} | {} | {} | 3", grid[6], grid[7], grid[8]);
     println!("------------------");
     println!("  | A | B | C |");
+}
+
+// Print the victory into the standard output.
+fn print_victory(grid: &Grid, player: char) {
+    println!();
+    print_grid(grid);
+    println!("");
+    println!("Player {} wins the game! Congratulations!", player);
+}
+
+// Print the draw into the standard output.
+fn print_draw(grid: &Grid) {
+    println!();
+    print_grid(grid);
+    println!("");
+    println!("Game ends in a draw! Better luck next time!");
 }
 
 // Get the index of the slot that corresponds to provided player input.
