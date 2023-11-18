@@ -23,7 +23,7 @@ pub fn show_menu() {
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
         Ok(_) => match input.trim() {
-            "1" => play([' '; 9], 'O'),
+            "1" => play(&[' '; 9], 'O'),
             "2" => println!("Bye!"),
             _ => show_menu(),
         },
@@ -31,11 +31,11 @@ pub fn show_menu() {
     }
 }
 
-fn play(grid: Grid, player: char) {
+fn play(grid: &Grid, player: char) {
     assert!(player == 'O' || player == 'X'); // TODO replace with a type.
     println!();
     println!("Current turn: {}", player);
-    print_grid(grid);
+    print_grid(&grid);
     println!("");
     println!("Please enter a cell e.g. 'B2':");
 
@@ -44,31 +44,31 @@ fn play(grid: Grid, player: char) {
         Ok(_) => match input_to_slot_index(&input) {
             Ok(val) => {
                 if is_free_slot(grid[val]) {
-                    let mut new_grid = grid;
+                    let mut new_grid = grid.clone();
                     new_grid[val] = player;
                     match check_game_state(grid) {
                         GameState::InProgress => {
                             if player == 'O' {
-                                play(new_grid, 'X');
+                                play(&new_grid, 'X');
                             } else {
-                                play(new_grid, 'O');
+                                play(&new_grid, 'O');
                             }
                         }
                         GameState::OWins => {
                             println!();
-                            print_grid(new_grid);
+                            print_grid(&new_grid);
                             println!("");
                             println!("Player O wins the game! Congratulations!");
                         }
                         GameState::XWins => {
                             println!();
-                            print_grid(new_grid);
+                            print_grid(&new_grid);
                             println!("");
                             println!("Player X wins the game! Congratulations!");
                         }
                         GameState::Draw => {
                             println!();
-                            print_grid(new_grid);
+                            print_grid(&new_grid);
                             println!("");
                             println!("Game ends in a draw! Better luck next time!");
                         }
@@ -82,7 +82,7 @@ fn play(grid: Grid, player: char) {
 }
 
 // Print the provided grid into the standard output.
-fn print_grid(grid: Grid) {
+fn print_grid(grid: &Grid) {
     println!("  | A | B | C |");
     println!("------------------");
     println!("1 | {} | {} | {} | 1", grid[0], grid[1], grid[2]);
@@ -111,7 +111,7 @@ fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
 }
 
 // Check what is the current state of the game based on the given grid.
-fn check_game_state(grid: Grid) -> GameState {
+fn check_game_state(grid: &Grid) -> GameState {
     if grid[0] != ' ' {
         if grid[0] == grid[1] && grid[0] == grid[2] {
             if grid[0] == 'X' {
@@ -226,35 +226,35 @@ mod tests {
 
     fn check_game_state_for_wins(tag: char, expected_state: GameState) {
         assert_eq!(
-            check_game_state([tag, tag, tag, ' ', ' ', ' ', ' ', ' ', ' ']),
+            check_game_state(&[tag, tag, tag, ' ', ' ', ' ', ' ', ' ', ' ']),
             expected_state
         );
         assert_eq!(
-            check_game_state([' ', ' ', ' ', tag, tag, tag, ' ', ' ', ' ']),
+            check_game_state(&[' ', ' ', ' ', tag, tag, tag, ' ', ' ', ' ']),
             expected_state
         );
         assert_eq!(
-            check_game_state([' ', ' ', ' ', ' ', ' ', ' ', tag, tag, tag]),
+            check_game_state(&[' ', ' ', ' ', ' ', ' ', ' ', tag, tag, tag]),
             expected_state
         );
         assert_eq!(
-            check_game_state([tag, ' ', ' ', tag, ' ', ' ', tag, ' ', ' ']),
+            check_game_state(&[tag, ' ', ' ', tag, ' ', ' ', tag, ' ', ' ']),
             expected_state
         );
         assert_eq!(
-            check_game_state([' ', tag, ' ', ' ', tag, ' ', ' ', tag, ' ']),
+            check_game_state(&[' ', tag, ' ', ' ', tag, ' ', ' ', tag, ' ']),
             expected_state
         );
         assert_eq!(
-            check_game_state([' ', ' ', tag, ' ', ' ', tag, ' ', ' ', tag]),
+            check_game_state(&[' ', ' ', tag, ' ', ' ', tag, ' ', ' ', tag]),
             expected_state
         );
         assert_eq!(
-            check_game_state([tag, ' ', ' ', ' ', tag, ' ', ' ', ' ', tag]),
+            check_game_state(&[tag, ' ', ' ', ' ', tag, ' ', ' ', ' ', tag]),
             expected_state
         );
         assert_eq!(
-            check_game_state([' ', ' ', tag, ' ', tag, ' ', tag, ' ', ' ']),
+            check_game_state(&[' ', ' ', tag, ' ', tag, ' ', tag, ' ', ' ']),
             expected_state
         );
     }
@@ -262,7 +262,7 @@ mod tests {
     #[test]
     fn check_game_state_for_draws() {
         assert_eq!(
-            check_game_state(['X', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O']),
+            check_game_state(&['X', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O']),
             GameState::Draw
         )
         // TODO Add more checks.
@@ -271,7 +271,7 @@ mod tests {
     #[test]
     fn check_game_state_for_in_progress() {
         assert_eq!(
-            check_game_state([' ', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O']),
+            check_game_state(&[' ', 'O', 'X', 'O', 'X', 'O', 'O', 'X', 'O']),
             GameState::InProgress,
         );
         // TODO Add more checks.
