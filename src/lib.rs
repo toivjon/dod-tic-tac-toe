@@ -170,10 +170,15 @@ fn check_game_state(grid: Grid) -> GameState {
             return GameState::OWins;
         }
     }
-    if !grid.contains(&' ') {
+    if grid_is_full(&grid) {
         return GameState::Draw;
     }
     return GameState::InProgress;
+}
+
+// Check whether the target grid is full i.e. every cell is occupied.
+fn grid_is_full(grid: &Grid) -> bool {
+    !grid.contains(&' ')
 }
 
 // Check whether the target slot is a slot which can be occupied.
