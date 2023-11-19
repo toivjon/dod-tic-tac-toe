@@ -29,7 +29,7 @@ fn play(grid: &Grid, player: char) {
     match io::stdin().read_line(&mut input) {
         Ok(_) => match input_to_slot_index(&input) {
             Ok(val) => {
-                if is_free_slot(grid[val]) {
+                if grid[val] == ' ' {
                     let mut new_grid = grid.clone();
                     new_grid[val] = player;
                     if has_win(&new_grid) {
@@ -120,11 +120,6 @@ fn has_win(grid: &Grid) -> bool {
 // Check whether the given grid contains a free cell.
 fn has_free(grid: &Grid) -> bool {
     grid.contains(&' ')
-}
-
-// Check whether the target slot is a slot which can be occupied.
-fn is_free_slot(slot: Slot) -> bool {
-    slot == ' '
 }
 
 #[cfg(test)]
