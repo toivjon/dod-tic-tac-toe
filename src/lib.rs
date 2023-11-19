@@ -51,6 +51,17 @@ fn play(grid: &Grid, player: char) {
     }
 }
 
+// Print the main menu into the standard output.
+fn print_main_menu() {
+    println!("===================");
+    println!("=== Tic-Tac-Toe ===");
+    println!("===================");
+    println!();
+    println!("Please enter a selection:");
+    println!("[1] Play");
+    println!("[2] Quit");
+}
+
 // Print the turn menu into the standard output.
 fn print_turn_menu(grid: &Grid, player: char) {
     println!();
