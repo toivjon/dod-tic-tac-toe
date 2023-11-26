@@ -3,8 +3,23 @@ use std::{collections::VecDeque, io};
 type Slot = char;
 type Grid = [Slot; 9];
 
+// An enumeration for available player types.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Player {
+    X,
+    O,
+}
+
 // The definition which player starts the game.
-const STARTING_PLAYER: char = 'O';
+const STARTING_PLAYER: Player = Player::O;
+
+// Return the character representing the player.
+fn player_char(player: Player) -> char {
+    match player {
+        Player::O => 'O',
+        Player::X => 'X',
+    }
+}
 
 enum Command {
     Exit,
@@ -13,8 +28,8 @@ enum Command {
     },
     WaitInput {
         grid: Grid,
-        player: char,
-        handler: fn(&str, grid: &Grid, player: char) -> Vec<Command>,
+        player: Player,
+        handler: fn(&str, grid: &Grid, player: Player) -> Vec<Command>,
     },
 }
 
@@ -49,7 +64,7 @@ pub fn run() {
     println!("Bye!")
 }
 
-fn handle_main_menu_input(input: &str, grid: &Grid, player: char) -> Vec<Command> {
+fn handle_main_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Command> {
     match input {
         "1" => {
             vec![
@@ -73,30 +88,30 @@ fn handle_main_menu_input(input: &str, grid: &Grid, player: char) -> Vec<Command
     }
 }
 
-fn handle_turn_menu_input(input: &str, grid: &Grid, player: char) -> Vec<Command> {
+fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Command> {
     match input_to_slot_index(&input) {
         Ok(val) => {
             if grid[val] == ' ' {
                 let mut new_grid = grid.clone();
-                new_grid[val] = player;
+                new_grid[val] = player_char(player);
                 if has_win(&new_grid) {
                     vec![print_victory(grid, player), Command::Exit]
                 } else if has_free(&new_grid) {
-                    if player == 'O' {
+                    if player == Player::O {
                         vec![
-                            print_turn_menu(&new_grid, 'X'),
+                            print_turn_menu(&new_grid, Player::X),
                             Command::WaitInput {
                                 grid: new_grid,
-                                player: 'X',
+                                player: Player::X,
                                 handler: handle_turn_menu_input,
                             },
                         ]
                     } else {
                         vec![
-                            print_turn_menu(&new_grid, 'O'),
+                            print_turn_menu(&new_grid, Player::O),
                             Command::WaitInput {
                                 grid: new_grid,
-                                player: 'O',
+                                player: Player::O,
                                 handler: handle_turn_menu_input,
                             },
                         ]
@@ -143,12 +158,12 @@ Please enter a selection:
     }
 }
 
-fn print_turn_menu(grid: &Grid, player: char) -> Command {
+fn print_turn_menu(grid: &Grid, player: Player) -> Command {
     Command::Print {
         val: format!(
             "
 
-Current turn: {}
+Current turn: {:?}
 {}
 
 Please enter a cell e.g. 'B2':
@@ -177,14 +192,14 @@ fn grid_string(grid: &Grid) -> String {
     )
 }
 
-fn print_victory(grid: &Grid, player: char) -> Command {
+fn print_victory(grid: &Grid, player: Player) -> Command {
     Command::Print {
         val: format!(
             "
 
 {}
 
-Player {} wins the game! Congratulations!
+Player {:?} wins the game! Congratulations!
 ",
             grid_string(grid),
             player
