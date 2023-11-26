@@ -3,6 +3,9 @@ use std::{collections::VecDeque, io};
 type Slot = char;
 type Grid = [Slot; 9];
 
+// The definition which player starts the game.
+const STARTING_PLAYER: char = 'O';
+
 enum Command {
     Exit,
     Print {
@@ -20,7 +23,7 @@ pub fn run() {
     commands.push_back(print_main_menu());
     commands.push_back(Command::WaitInput {
         grid: [' '; 9],
-        player: 'O',
+        player: STARTING_PLAYER,
         handler: handle_main_menu_input,
     });
     while !commands.is_empty() {
