@@ -1,5 +1,5 @@
-use tic_tac_toe::show_menu;
+use tic_tac_toe::run;
 
 fn main() {
-    show_menu()
+    run()
 }
