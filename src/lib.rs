@@ -110,7 +110,7 @@ fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
                 let mut new_grid = grid.clone();
                 new_grid[val] = player_slot(player);
                 if has_win(&new_grid) {
-                    vec![print_victory(grid, player), Command::Exit]
+                    vec![print_victory(&new_grid, player), Command::Exit]
                 } else if has_free(&new_grid) {
                     if player == Player::O {
                         vec![
