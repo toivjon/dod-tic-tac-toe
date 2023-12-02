@@ -50,12 +50,7 @@ enum Command {
 
 pub fn run() {
     let mut commands = VecDeque::new();
-    commands.push_back(print_main_menu());
-    commands.push_back(Command::WaitInput {
-        grid: [Slot::Empty; 9],
-        player: STARTING_PLAYER,
-        handler: handle_main_menu_input,
-    });
+    commands.extend(cmd_main_menu([Slot::Empty; 9], STARTING_PLAYER));
     while !commands.is_empty() {
         match commands.pop_front() {
             None => panic!("PANIC: Empty command queue was popped!"),
@@ -83,14 +78,7 @@ fn handle_main_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
     match input {
         "1" => cmd_turn_menu(*grid, player),
         "2" => vec![Command::Exit],
-        _ => vec![
-            print_main_menu(),
-            Command::WaitInput {
-                grid: *grid,
-                player: player,
-                handler: handle_main_menu_input,
-            },
-        ],
+        _ => cmd_main_menu(*grid, player),
     }
 }
 
@@ -116,6 +104,18 @@ fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
         }
         Err(_) => cmd_turn_menu(*grid, player),
     }
+}
+
+fn cmd_main_menu(grid: Grid, player: Player) -> Vec<Command> {
+    let handler = handle_main_menu_input;
+    vec![
+        print_main_menu(),
+        Command::WaitInput {
+            grid,
+            player,
+            handler,
+        },
+    ]
 }
 
 fn cmd_turn_menu(grid: Grid, player: Player) -> Vec<Command> {
