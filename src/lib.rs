@@ -96,7 +96,7 @@ fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
                         Player::X => cmd_turn_menu(new_grid, Player::O),
                     }
                 } else {
-                    vec![print_draw(grid), Command::Exit]
+                    vec![print_draw(&new_grid), Command::Exit]
                 }
             } else {
                 cmd_turn_menu(*grid, player)
