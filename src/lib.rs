@@ -112,10 +112,9 @@ fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
                 if has_win(&new_grid) {
                     vec![print_victory(&new_grid, player), Command::Exit]
                 } else if has_free(&new_grid) {
-                    if player == Player::O {
-                        cmd_turn_menu(new_grid, Player::X)
-                    } else {
-                        cmd_turn_menu(new_grid, Player::O)
+                    match player {
+                        Player::O => cmd_turn_menu(new_grid, Player::X),
+                        Player::X => cmd_turn_menu(new_grid, Player::O),
                     }
                 } else {
                     vec![print_draw(grid), Command::Exit]
