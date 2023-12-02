@@ -82,21 +82,35 @@ fn handle_main_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
     }
 }
 
+enum GameState {
+    Victory,
+    Draw,
+    Unfinished,
+}
+
+fn game_state(grid: &Grid) -> GameState {
+    if has_win(grid) {
+        GameState::Victory
+    } else if has_free(grid) {
+        GameState::Unfinished
+    } else {
+        GameState::Draw
+    }
+}
+
 fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Command> {
     match input_to_slot_index(&input) {
         Ok(val) => {
             if grid[val] == Slot::Empty {
                 let mut new_grid = grid.clone();
                 new_grid[val] = player_slot(player);
-                if has_win(&new_grid) {
-                    cmd_victory(new_grid, player)
-                } else if has_free(&new_grid) {
-                    match player {
+                match game_state(&new_grid) {
+                    GameState::Victory => cmd_victory(new_grid, player),
+                    GameState::Draw => cmd_draw(new_grid),
+                    GameState::Unfinished => match player {
                         Player::O => cmd_turn_menu(new_grid, Player::X),
                         Player::X => cmd_turn_menu(new_grid, Player::O),
-                    }
-                } else {
-                    cmd_draw(new_grid)
+                    },
                 }
             } else {
                 cmd_turn_menu(*grid, player)
