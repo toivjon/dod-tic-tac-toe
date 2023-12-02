@@ -1,8 +1,5 @@
 use std::{collections::VecDeque, io};
 
-type Slot = char;
-type Grid = [Slot; 9];
-
 // An enumeration for available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Player {
@@ -13,13 +10,31 @@ enum Player {
 // The definition which player starts the game.
 const STARTING_PLAYER: Player = Player::O;
 
-// Return the character representing the player.
-fn player_char(player: Player) -> char {
+// Return the slot representing the player.
+fn player_slot(player: Player) -> Slot {
     match player {
-        Player::O => 'O',
-        Player::X => 'X',
+        Player::O => Slot::O,
+        Player::X => Slot::X,
     }
 }
+
+#[derive(Clone, Copy, PartialEq)]
+enum Slot {
+    Empty,
+    X,
+    O,
+}
+
+// Return the char presenting the slot.
+fn slot_char(slot: Slot) -> char {
+    match slot {
+        Slot::Empty => ' ',
+        Slot::O => 'O',
+        Slot::X => 'X',
+    }
+}
+
+type Grid = [Slot; 9];
 
 enum Command {
     Exit,
@@ -37,7 +52,7 @@ pub fn run() {
     let mut commands = VecDeque::new();
     commands.push_back(print_main_menu());
     commands.push_back(Command::WaitInput {
-        grid: [' '; 9],
+        grid: [Slot::Empty; 9],
         player: STARTING_PLAYER,
         handler: handle_main_menu_input,
     });
@@ -91,9 +106,9 @@ fn handle_main_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
 fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Command> {
     match input_to_slot_index(&input) {
         Ok(val) => {
-            if grid[val] == ' ' {
+            if grid[val] == Slot::Empty {
                 let mut new_grid = grid.clone();
-                new_grid[val] = player_char(player);
+                new_grid[val] = player_slot(player);
                 if has_win(&new_grid) {
                     vec![print_victory(grid, player), Command::Exit]
                 } else if has_free(&new_grid) {
@@ -176,6 +191,7 @@ Please enter a cell e.g. 'B2':
 }
 
 fn grid_string(grid: &Grid) -> String {
+    let chars = grid.map(slot_char);
     format!(
         "
   | A | B | C |
@@ -188,7 +204,7 @@ fn grid_string(grid: &Grid) -> String {
 ------------------
   | A | B | C |
   ",
-        grid[0], grid[1], grid[2], grid[3], grid[4], grid[5], grid[6], grid[7], grid[8]
+        chars[0], chars[1], chars[2], chars[3], chars[4], chars[5], chars[6], chars[7], chars[8]
     )
 }
 
@@ -238,23 +254,25 @@ fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
 
 // Check whether the given grid contains a winning line.
 fn has_win(grid: &Grid) -> bool {
-    (grid[0] != ' ' && grid[0] == grid[1] && grid[1] == grid[2])
-        || (grid[3] != ' ' && grid[3] == grid[4] && grid[4] == grid[5])
-        || (grid[6] != ' ' && grid[6] == grid[7] && grid[7] == grid[8])
-        || (grid[0] != ' ' && grid[0] == grid[3] && grid[3] == grid[6])
-        || (grid[1] != ' ' && grid[1] == grid[4] && grid[4] == grid[7])
-        || (grid[2] != ' ' && grid[2] == grid[5] && grid[5] == grid[8])
-        || (grid[0] != ' ' && grid[0] == grid[4] && grid[4] == grid[8])
-        || (grid[2] != ' ' && grid[2] == grid[4] && grid[4] == grid[6])
+    (grid[0] != Slot::Empty && grid[0] == grid[1] && grid[1] == grid[2])
+        || (grid[3] != Slot::Empty && grid[3] == grid[4] && grid[4] == grid[5])
+        || (grid[6] != Slot::Empty && grid[6] == grid[7] && grid[7] == grid[8])
+        || (grid[0] != Slot::Empty && grid[0] == grid[3] && grid[3] == grid[6])
+        || (grid[1] != Slot::Empty && grid[1] == grid[4] && grid[4] == grid[7])
+        || (grid[2] != Slot::Empty && grid[2] == grid[5] && grid[5] == grid[8])
+        || (grid[0] != Slot::Empty && grid[0] == grid[4] && grid[4] == grid[8])
+        || (grid[2] != Slot::Empty && grid[2] == grid[4] && grid[4] == grid[6])
 }
 
 // Check whether the given grid contains a free cell.
 fn has_free(grid: &Grid) -> bool {
-    grid.contains(&' ')
+    grid.contains(&Slot::Empty)
 }
 
 #[cfg(test)]
 mod tests {
+
+    use crate::Slot::{Empty, O, X};
 
     use crate::{has_free, has_win, input_to_slot_index};
 
@@ -283,51 +301,83 @@ mod tests {
 
     #[test]
     fn has_win_returns_true_when_win() {
-        assert!(has_win(&['X', 'X', 'X', ' ', ' ', ' ', ' ', ' ', ' ']));
-        assert!(has_win(&[' ', ' ', ' ', 'X', 'X', 'X', ' ', ' ', ' ']));
-        assert!(has_win(&[' ', ' ', ' ', ' ', ' ', ' ', 'X', 'X', 'X']));
-        assert!(has_win(&['X', ' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ']));
-        assert!(has_win(&[' ', 'X', ' ', ' ', 'X', ' ', ' ', 'X', ' ']));
-        assert!(has_win(&[' ', ' ', 'X', ' ', ' ', 'X', ' ', ' ', 'X']));
-        assert!(has_win(&['X', ' ', ' ', ' ', 'X', ' ', ' ', ' ', 'X']));
-        assert!(has_win(&[' ', ' ', 'X', ' ', 'X', ' ', 'X', ' ', ' ']));
+        assert!(has_win(&[
+            X, X, X, Empty, Empty, Empty, Empty, Empty, Empty
+        ]));
+        assert!(has_win(&[
+            Empty, Empty, Empty, X, X, X, Empty, Empty, Empty
+        ]));
+        assert!(has_win(&[
+            Empty, Empty, Empty, Empty, Empty, Empty, X, X, X
+        ]));
+        assert!(has_win(&[
+            X, Empty, Empty, X, Empty, Empty, X, Empty, Empty
+        ]));
+        assert!(has_win(&[
+            Empty, X, Empty, Empty, X, Empty, Empty, X, Empty
+        ]));
+        assert!(has_win(&[
+            Empty, Empty, X, Empty, Empty, X, Empty, Empty, X
+        ]));
+        assert!(has_win(&[
+            X, Empty, Empty, Empty, X, Empty, Empty, Empty, X
+        ]));
+        assert!(has_win(&[
+            Empty, Empty, X, Empty, X, Empty, X, Empty, Empty
+        ]));
     }
 
     #[test]
     fn has_win_returns_false_when_no_win() {
-        assert!(!has_win(&['X', 'O', 'X', ' ', ' ', ' ', ' ', ' ', ' ']));
-        assert!(!has_win(&[' ', ' ', ' ', 'X', 'O', 'X', ' ', ' ', ' ']));
-        assert!(!has_win(&[' ', ' ', ' ', ' ', ' ', ' ', 'X', 'O', 'X']));
-        assert!(!has_win(&['X', ' ', ' ', 'O', ' ', ' ', 'X', ' ', ' ']));
-        assert!(!has_win(&[' ', 'X', ' ', ' ', 'O', ' ', ' ', 'X', ' ']));
-        assert!(!has_win(&[' ', ' ', 'X', ' ', ' ', 'O', ' ', ' ', 'X']));
-        assert!(!has_win(&['X', ' ', ' ', ' ', 'O', ' ', ' ', ' ', 'X']));
-        assert!(!has_win(&[' ', ' ', 'X', ' ', 'O', ' ', 'X', ' ', ' ']));
+        assert!(!has_win(&[
+            X, O, X, Empty, Empty, Empty, Empty, Empty, Empty
+        ]));
+        assert!(!has_win(&[
+            Empty, Empty, Empty, X, O, X, Empty, Empty, Empty
+        ]));
+        assert!(!has_win(&[
+            Empty, Empty, Empty, Empty, Empty, Empty, X, O, X
+        ]));
+        assert!(!has_win(&[
+            X, Empty, Empty, O, Empty, Empty, X, Empty, Empty
+        ]));
+        assert!(!has_win(&[
+            Empty, X, Empty, Empty, O, Empty, Empty, X, Empty
+        ]));
+        assert!(!has_win(&[
+            Empty, Empty, X, Empty, Empty, O, Empty, Empty, X
+        ]));
+        assert!(!has_win(&[
+            X, Empty, Empty, Empty, O, Empty, Empty, Empty, X
+        ]));
+        assert!(!has_win(&[
+            Empty, Empty, X, Empty, O, Empty, X, Empty, Empty
+        ]));
     }
 
     #[test]
     fn has_free_returns_true_when_free_cell_exists() {
-        assert!(has_free(&[' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X']));
-        assert!(has_free(&['X', ' ', 'X', 'X', 'X', 'X', 'X', 'X', 'X']));
-        assert!(has_free(&['X', 'X', ' ', 'X', 'X', 'X', 'X', 'X', 'X']));
-        assert!(has_free(&['X', 'X', 'X', ' ', 'X', 'X', 'X', 'X', 'X']));
-        assert!(has_free(&['X', 'X', 'X', 'X', ' ', 'X', 'X', 'X', 'X']));
-        assert!(has_free(&['X', 'X', 'X', 'X', 'X', ' ', 'X', 'X', 'X']));
-        assert!(has_free(&['X', 'X', 'X', 'X', 'X', 'X', ' ', 'X', 'X']));
-        assert!(has_free(&['X', 'X', 'X', 'X', 'X', 'X', 'X', ' ', 'X']));
-        assert!(has_free(&['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', ' ']));
+        assert!(has_free(&[Empty, X, X, X, X, X, X, X, X]));
+        assert!(has_free(&[X, Empty, X, X, X, X, X, X, X]));
+        assert!(has_free(&[X, X, Empty, X, X, X, X, X, X]));
+        assert!(has_free(&[X, X, X, Empty, X, X, X, X, X]));
+        assert!(has_free(&[X, X, X, X, Empty, X, X, X, X]));
+        assert!(has_free(&[X, X, X, X, X, Empty, X, X, X]));
+        assert!(has_free(&[X, X, X, X, X, X, Empty, X, X]));
+        assert!(has_free(&[X, X, X, X, X, X, X, Empty, X]));
+        assert!(has_free(&[X, X, X, X, X, X, X, X, Empty]));
     }
 
     #[test]
     fn has_free_returns_false_when_no_free_cell_exists() {
-        assert!(!has_free(&['O', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'X']));
-        assert!(!has_free(&['X', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'X']));
-        assert!(!has_free(&['X', 'X', 'O', 'X', 'X', 'X', 'X', 'X', 'X']));
-        assert!(!has_free(&['X', 'X', 'X', 'O', 'X', 'X', 'X', 'X', 'X']));
-        assert!(!has_free(&['X', 'X', 'X', 'X', 'O', 'X', 'X', 'X', 'X']));
-        assert!(!has_free(&['X', 'X', 'X', 'X', 'X', 'O', 'X', 'X', 'X']));
-        assert!(!has_free(&['X', 'X', 'X', 'X', 'X', 'X', 'O', 'X', 'X']));
-        assert!(!has_free(&['X', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'X']));
-        assert!(!has_free(&['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'O']));
+        assert!(!has_free(&[O, X, X, X, X, X, X, X, X]));
+        assert!(!has_free(&[X, O, X, X, X, X, X, X, X]));
+        assert!(!has_free(&[X, X, O, X, X, X, X, X, X]));
+        assert!(!has_free(&[X, X, X, O, X, X, X, X, X]));
+        assert!(!has_free(&[X, X, X, X, O, X, X, X, X]));
+        assert!(!has_free(&[X, X, X, X, X, O, X, X, X]));
+        assert!(!has_free(&[X, X, X, X, X, X, O, X, X]));
+        assert!(!has_free(&[X, X, X, X, X, X, X, O, X]));
+        assert!(!has_free(&[X, X, X, X, X, X, X, X, O]));
     }
 }
