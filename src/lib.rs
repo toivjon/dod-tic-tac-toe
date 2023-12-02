@@ -81,16 +81,7 @@ pub fn run() {
 
 fn handle_main_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Command> {
     match input {
-        "1" => {
-            vec![
-                print_turn_menu(grid, player),
-                Command::WaitInput {
-                    grid: *grid,
-                    player: player,
-                    handler: handle_turn_menu_input,
-                },
-            ]
-        }
+        "1" => cmd_turn_menu(*grid, player),
         "2" => vec![Command::Exit],
         _ => vec![
             print_main_menu(),
