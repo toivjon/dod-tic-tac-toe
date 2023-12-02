@@ -89,14 +89,14 @@ fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
                 let mut new_grid = grid.clone();
                 new_grid[val] = player_slot(player);
                 if has_win(&new_grid) {
-                    vec![print_victory(&new_grid, player), Command::Exit]
+                    cmd_victory(new_grid, player)
                 } else if has_free(&new_grid) {
                     match player {
                         Player::O => cmd_turn_menu(new_grid, Player::X),
                         Player::X => cmd_turn_menu(new_grid, Player::O),
                     }
                 } else {
-                    vec![print_draw(&new_grid), Command::Exit]
+                    cmd_draw(new_grid)
                 }
             } else {
                 cmd_turn_menu(*grid, player)
@@ -128,6 +128,14 @@ fn cmd_turn_menu(grid: Grid, player: Player) -> Vec<Command> {
             handler,
         },
     ]
+}
+
+fn cmd_victory(grid: Grid, player: Player) -> Vec<Command> {
+    vec![print_victory(&grid, player), Command::Exit]
+}
+
+fn cmd_draw(grid: Grid) -> Vec<Command> {
+    vec![print_draw(&grid), Command::Exit]
 }
 
 fn print_main_menu() -> Command {
