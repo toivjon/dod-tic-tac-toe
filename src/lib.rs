@@ -113,47 +113,31 @@ fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Comma
                     vec![print_victory(&new_grid, player), Command::Exit]
                 } else if has_free(&new_grid) {
                     if player == Player::O {
-                        vec![
-                            print_turn_menu(&new_grid, Player::X),
-                            Command::WaitInput {
-                                grid: new_grid,
-                                player: Player::X,
-                                handler: handle_turn_menu_input,
-                            },
-                        ]
+                        cmd_turn_menu(new_grid, Player::X)
                     } else {
-                        vec![
-                            print_turn_menu(&new_grid, Player::O),
-                            Command::WaitInput {
-                                grid: new_grid,
-                                player: Player::O,
-                                handler: handle_turn_menu_input,
-                            },
-                        ]
+                        cmd_turn_menu(new_grid, Player::O)
                     }
                 } else {
                     vec![print_draw(grid), Command::Exit]
                 }
             } else {
-                vec![
-                    print_turn_menu(grid, player),
-                    Command::WaitInput {
-                        grid: *grid,
-                        player: player,
-                        handler: handle_turn_menu_input,
-                    },
-                ]
+                cmd_turn_menu(*grid, player)
             }
         }
-        Err(_) => vec![
-            print_turn_menu(grid, player),
-            Command::WaitInput {
-                grid: *grid,
-                player: player,
-                handler: handle_turn_menu_input,
-            },
-        ],
+        Err(_) => cmd_turn_menu(*grid, player),
     }
+}
+
+fn cmd_turn_menu(grid: Grid, player: Player) -> Vec<Command> {
+    let handler = handle_turn_menu_input;
+    vec![
+        print_turn_menu(&grid, player),
+        Command::WaitInput {
+            grid,
+            player,
+            handler,
+        },
+    ]
 }
 
 fn print_main_menu() -> Command {
