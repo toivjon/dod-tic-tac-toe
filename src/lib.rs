@@ -67,22 +67,22 @@ enum Command {
     },
 }
 
-pub fn run() {
+pub fn run(output: fn(&str)) {
     let mut commands = Vec::new();
     commands.extend(cmd_main_menu([Slot::Empty; 9], STARTING_PLAYER));
     while !commands.is_empty() {
         commands = commands
             .iter()
-            .flat_map(|command| execute_command(command))
+            .flat_map(|command| execute_command(command, output))
             .collect();
     }
-    println!("Bye!")
+    output("Bye!")
 }
 
-fn execute_command(command: &Command) -> Vec<Command> {
+fn execute_command(command: &Command, output: fn(&str)) -> Vec<Command> {
     match command {
         Command::Print { val } => {
-            println!("{val}");
+            output(format!("{val}").as_str());
             vec![]
         }
         Command::WaitInput {
