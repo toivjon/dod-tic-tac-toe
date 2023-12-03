@@ -113,7 +113,7 @@ fn output_main_menu(output: fn(&str)) {
 fn handle_main_menu(input: fn() -> String) -> Vec<Command> {
     match input().trim() {
         "1" => vec![Command::TurnMenu([Slot::Empty; 9], STARTING_PLAYER)],
-        "2" => vec![],
+        "2" => vec![Command::Exit],
         _ => vec![Command::MainMenu],
     }
 }
