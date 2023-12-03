@@ -1,4 +1,4 @@
-use std::io;
+use std::{io, vec};
 
 // An enumeration for available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -11,7 +11,7 @@ enum Player {
 const STARTING_PLAYER: Player = Player::O;
 
 // Return the slot representing the player.
-fn player_slot(player: Player) -> Slot {
+fn player_slot(player: &Player) -> Slot {
     match player {
         Player::O => Slot::O,
         Player::X => Slot::X,
@@ -57,54 +57,102 @@ fn grid_string(grid: &Grid) -> String {
 }
 
 enum Command {
-    Print {
-        val: String,
-    },
-    WaitInput {
-        grid: Grid,
-        player: Player,
-        handler: fn(&str, grid: &Grid, player: Player) -> Vec<Command>,
-    },
+    MainMenu,
+    TurnMenu(Grid, Player),
+    Victory(Grid, Player),
+    Draw(Grid)
 }
 
-pub fn run(output: fn(&str)) {
+pub fn run(output: fn(&str), input: fn() -> String) {
     let mut commands = Vec::new();
-    commands.extend(cmd_main_menu([Slot::Empty; 9], STARTING_PLAYER));
+    commands.extend(vec![Command::MainMenu]);
     while !commands.is_empty() {
         commands = commands
             .iter()
-            .flat_map(|command| execute_command(command, output))
+            .flat_map(|command| execute_command(command, output, input))
             .collect();
     }
     output("Bye!")
 }
 
-fn execute_command(command: &Command, output: fn(&str)) -> Vec<Command> {
+fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -> Vec<Command> {
     match command {
-        Command::Print { val } => {
-            output(format!("{val}").as_str());
+        Command::MainMenu => {
+            output_main_menu(output);
+            handle_main_menu(input)
+        }
+        Command::TurnMenu(grid, player) => {
+            output_turn_menu(output, grid, player);
+            handle_turn_menu(input, grid, player)
+        }
+        Command::Victory(grid, player) => {
+            output_victory(output, grid, player);
             vec![]
         }
-        Command::WaitInput {
-            grid,
-            player,
-            handler,
-        } => {
-            let mut input = String::new();
-            match io::stdin().read_line(&mut input) {
-                Ok(_) => handler(input.trim(), &grid, *player),
-                Err(_) => todo!(),
-            }
+        Command::Draw(grid) => {
+            output_draw(output, grid);
+            vec![]
         }
     }
 }
 
-fn handle_main_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Command> {
-    match input {
-        "1" => cmd_turn_menu(*grid, player),
+fn output_main_menu(output: fn(&str)) {
+    output("===================");
+    output("=== Tic-Tac-Toe ===");
+    output("===================");
+    output("");
+    output("Please enter a selection:");
+    output("[1] Play");
+    output("[2] Quit");
+}
+
+fn handle_main_menu(input: fn() -> String) -> Vec<Command> {
+    match input().trim() {
+        "1" => vec![Command::TurnMenu([Slot::Empty; 9], Player::O)],
         "2" => vec![],
-        _ => cmd_main_menu(*grid, player),
+        _ => vec![Command::MainMenu],
     }
+}
+
+fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
+    output(format!("Current turn: {:?}", player).as_str());
+    output(format!("{}", grid_string(grid)).as_str());
+    output("");
+    output("Please enter a cell e.g. 'B2':");
+}
+
+fn handle_turn_menu(input: fn() -> String, grid: &Grid, player: &Player) -> Vec<Command> {
+    match input_to_slot_index(input().trim()) {
+        Ok(val) => {
+            if grid[val] == Slot::Empty {
+                let mut new_grid = grid.clone();
+                new_grid[val] = player_slot(player);
+                match game_state(&new_grid) {
+                    GameState::Victory => vec![Command::Victory(new_grid, *player)],
+                    GameState::Draw => vec![Command::Draw(new_grid)],
+                    GameState::Unfinished => match player {
+                        Player::O => vec![Command::TurnMenu(new_grid, Player::X)],
+                        Player::X => vec![Command::TurnMenu(new_grid, Player::O)],
+                    },
+                }
+            } else {
+                vec![Command::TurnMenu(*grid, *player)]
+            }
+        }
+        Err(_) => vec![Command::TurnMenu(*grid, *player)],
+    }
+}
+
+fn output_victory(output: fn(&str), grid: &Grid, player: &Player) {
+    output(format!("{}", grid_string(grid)).as_str());
+    output("");
+    output(format!("Player {:?} wins the game! Congratulations!", player).as_str());
+}
+
+fn output_draw(output: fn(&str), grid: &Grid) {
+    output(format!("{}", grid_string(grid)).as_str());
+    output("");
+    output("Game ends in a draw! Better luck next time!");
 }
 
 enum GameState {
@@ -120,118 +168,6 @@ fn game_state(grid: &Grid) -> GameState {
         GameState::Unfinished
     } else {
         GameState::Draw
-    }
-}
-
-fn handle_turn_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Command> {
-    match input_to_slot_index(&input) {
-        Ok(val) => {
-            if grid[val] == Slot::Empty {
-                let mut new_grid = grid.clone();
-                new_grid[val] = player_slot(player);
-                match game_state(&new_grid) {
-                    GameState::Victory => cmd_victory(new_grid, player),
-                    GameState::Draw => cmd_draw(new_grid),
-                    GameState::Unfinished => match player {
-                        Player::O => cmd_turn_menu(new_grid, Player::X),
-                        Player::X => cmd_turn_menu(new_grid, Player::O),
-                    },
-                }
-            } else {
-                cmd_turn_menu(*grid, player)
-            }
-        }
-        Err(_) => cmd_turn_menu(*grid, player),
-    }
-}
-
-fn cmd_main_menu(grid: Grid, player: Player) -> Vec<Command> {
-    let handler = handle_main_menu_input;
-    vec![
-        print_main_menu(),
-        Command::WaitInput {
-            grid,
-            player,
-            handler,
-        },
-    ]
-}
-
-fn cmd_turn_menu(grid: Grid, player: Player) -> Vec<Command> {
-    let handler = handle_turn_menu_input;
-    vec![
-        print_turn_menu(&grid, player),
-        Command::WaitInput {
-            grid,
-            player,
-            handler,
-        },
-    ]
-}
-
-fn cmd_victory(grid: Grid, player: Player) -> Vec<Command> {
-    vec![print_victory(&grid, player)]
-}
-
-fn cmd_draw(grid: Grid) -> Vec<Command> {
-    vec![print_draw(&grid)]
-}
-
-fn print_main_menu() -> Command {
-    Command::Print {
-        val: format!(
-            "
-===================
-=== Tic-Tac-Toe ===
-===================
-
-Please enter a selection:
-[1] Play
-[2] Quit
-"
-        ),
-    }
-}
-
-fn print_turn_menu(grid: &Grid, player: Player) -> Command {
-    Command::Print {
-        val: format!(
-            "
-Current turn: {:?}
-{}
-
-Please enter a cell e.g. 'B2':
-",
-            player,
-            grid_string(grid)
-        ),
-    }
-}
-
-fn print_victory(grid: &Grid, player: Player) -> Command {
-    Command::Print {
-        val: format!(
-            "
-{}
-
-Player {:?} wins the game! Congratulations!
-",
-            grid_string(grid),
-            player
-        ),
-    }
-}
-
-fn print_draw(grid: &Grid) -> Command {
-    Command::Print {
-        val: format!(
-            "
-{}            
-
-Game ends in a draw! Better luck next time!
-            ",
-            grid_string(grid)
-        ),
     }
 }
 
