@@ -71,16 +71,17 @@ pub fn run() {
     let mut commands = VecDeque::new();
     commands.extend(cmd_main_menu([Slot::Empty; 9], STARTING_PLAYER));
     while !commands.is_empty() {
-        let new_commands = match commands.pop_front() {
-            None => panic!("PANIC: Empty command queue was popped!"),
-            Some(command) => execute_command(command),
-        };
+        let new_commands: Vec<Command> = commands
+            .iter()
+            .flat_map(|command| execute_command(command))
+            .collect();
+        commands.clear();
         commands.extend(new_commands);
     }
     println!("Bye!")
 }
 
-fn execute_command(command: Command) -> Vec<Command> {
+fn execute_command(command: &Command) -> Vec<Command> {
     match command {
         Command::Print { val } => {
             println!("{val}");
@@ -93,7 +94,7 @@ fn execute_command(command: Command) -> Vec<Command> {
         } => {
             let mut input = String::new();
             match io::stdin().read_line(&mut input) {
-                Ok(_) => handler(input.trim(), &grid, player),
+                Ok(_) => handler(input.trim(), &grid, *player),
                 Err(_) => todo!(),
             }
         }
