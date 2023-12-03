@@ -57,7 +57,6 @@ fn grid_string(grid: &Grid) -> String {
 }
 
 enum Command {
-    Exit,
     Print {
         val: String,
     },
@@ -75,7 +74,6 @@ pub fn run() {
         match commands.pop_front() {
             None => panic!("PANIC: Empty command queue was popped!"),
             Some(command) => match command {
-                Command::Exit => break,
                 Command::Print { val } => println!("{val}"),
                 Command::WaitInput {
                     grid,
@@ -97,7 +95,7 @@ pub fn run() {
 fn handle_main_menu_input(input: &str, grid: &Grid, player: Player) -> Vec<Command> {
     match input {
         "1" => cmd_turn_menu(*grid, player),
-        "2" => vec![Command::Exit],
+        "2" => vec![],
         _ => cmd_main_menu(*grid, player),
     }
 }
@@ -165,11 +163,11 @@ fn cmd_turn_menu(grid: Grid, player: Player) -> Vec<Command> {
 }
 
 fn cmd_victory(grid: Grid, player: Player) -> Vec<Command> {
-    vec![print_victory(&grid, player), Command::Exit]
+    vec![print_victory(&grid, player)]
 }
 
 fn cmd_draw(grid: Grid) -> Vec<Command> {
-    vec![print_draw(&grid), Command::Exit]
+    vec![print_draw(&grid)]
 }
 
 fn print_main_menu() -> Command {
