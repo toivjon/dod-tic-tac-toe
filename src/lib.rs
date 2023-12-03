@@ -75,8 +75,7 @@ pub fn run() {
             .iter()
             .flat_map(|command| execute_command(command))
             .collect();
-        commands.clear();
-        commands.extend(new_commands);
+        commands = new_commands;
     }
     println!("Bye!")
 }
