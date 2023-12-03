@@ -188,7 +188,6 @@ fn print_main_menu() -> Command {
 Please enter a selection:
 [1] Play
 [2] Quit
-
 "
         ),
     }
@@ -198,12 +197,10 @@ fn print_turn_menu(grid: &Grid, player: Player) -> Command {
     Command::Print {
         val: format!(
             "
-
 Current turn: {:?}
 {}
 
 Please enter a cell e.g. 'B2':
-
 ",
             player,
             grid_string(grid)
@@ -215,7 +212,6 @@ fn print_victory(grid: &Grid, player: Player) -> Command {
     Command::Print {
         val: format!(
             "
-
 {}
 
 Player {:?} wins the game! Congratulations!
