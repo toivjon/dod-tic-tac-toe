@@ -71,11 +71,10 @@ pub fn run() {
     let mut commands = Vec::new();
     commands.extend(cmd_main_menu([Slot::Empty; 9], STARTING_PLAYER));
     while !commands.is_empty() {
-        let new_commands: Vec<Command> = commands
+        commands = commands
             .iter()
             .flat_map(|command| execute_command(command))
             .collect();
-        commands = new_commands;
     }
     println!("Bye!")
 }
