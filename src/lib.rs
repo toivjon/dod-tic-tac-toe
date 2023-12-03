@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, io};
+use std::io;
 
 // An enumeration for available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -68,7 +68,7 @@ enum Command {
 }
 
 pub fn run() {
-    let mut commands = VecDeque::new();
+    let mut commands = Vec::new();
     commands.extend(cmd_main_menu([Slot::Empty; 9], STARTING_PLAYER));
     while !commands.is_empty() {
         let new_commands: Vec<Command> = commands
