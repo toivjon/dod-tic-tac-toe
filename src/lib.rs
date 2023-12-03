@@ -60,7 +60,8 @@ enum Command {
     MainMenu,
     TurnMenu(Grid, Player),
     Victory(Grid, Player),
-    Draw(Grid)
+    Draw(Grid),
+    Exit,
 }
 
 pub fn run(output: fn(&str), input: fn() -> String) {
@@ -72,7 +73,6 @@ pub fn run(output: fn(&str), input: fn() -> String) {
             .flat_map(|command| execute_command(command, output, input))
             .collect();
     }
-    output("Bye!")
 }
 
 fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -> Vec<Command> {
@@ -87,10 +87,14 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
         }
         Command::Victory(grid, player) => {
             output_victory(output, grid, player);
-            vec![]
+            vec![Command::Exit]
         }
         Command::Draw(grid) => {
             output_draw(output, grid);
+            vec![Command::Exit]
+        }
+        Command::Exit => {
+            output("Bye!");
             vec![]
         }
     }
