@@ -34,7 +34,27 @@ fn slot_char(slot: Slot) -> char {
     }
 }
 
+// A type for the game grid containing 3x3 slots.
 type Grid = [Slot; 9];
+
+// Return a string representing the grid contents.
+fn grid_string(grid: &Grid) -> String {
+    let chars = grid.map(slot_char);
+    format!(
+        "
+  | A | B | C |
+------------------
+1 | {} | {} | {} | 1
+------------------
+2 | {} | {} | {} | 2
+------------------
+3 | {} | {} | {} | 3
+------------------
+  | A | B | C |  
+",
+        chars[0], chars[1], chars[2], chars[3], chars[4], chars[5], chars[6], chars[7], chars[8]
+    )
+}
 
 enum Command {
     Exit,
@@ -184,24 +204,6 @@ Please enter a cell e.g. 'B2':
             grid_string(grid)
         ),
     }
-}
-
-fn grid_string(grid: &Grid) -> String {
-    let chars = grid.map(slot_char);
-    format!(
-        "
-  | A | B | C |
-------------------
-1 | {} | {} | {} | 1
-------------------
-2 | {} | {} | {} | 2
-------------------
-3 | {} | {} | {} | 3
-------------------
-  | A | B | C |
-  ",
-        chars[0], chars[1], chars[2], chars[3], chars[4], chars[5], chars[6], chars[7], chars[8]
-    )
 }
 
 fn print_victory(grid: &Grid, player: Player) -> Command {
