@@ -1,4 +1,4 @@
-use std::{io, vec};
+use std::vec;
 
 // An enumeration for available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
