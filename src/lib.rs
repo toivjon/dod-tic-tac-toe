@@ -1,7 +1,7 @@
 use std::vec;
 
 // An enumeration for available player types.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug)]
 enum Player {
     X,
     O,
