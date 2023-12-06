@@ -15,6 +15,6 @@ fn input() -> String {
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
         Ok(_) => input,
-        Err(_) => todo!(),
+        Err(_) => String::from(""),
     }
 }
