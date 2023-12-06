@@ -6,15 +6,6 @@ pub fn run(output: fn(&str), input: fn() -> String) {
     }
 }
 
-// An enumeration of all available commands within the game.
-enum Command {
-    MainMenu,
-    TurnMenu(Grid, Player),
-    Victory(Grid, Player),
-    Draw(Grid),
-    Exit,
-}
-
 // Execute the given command possibly leading into a next command to be executed.
 fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -> Option<Command> {
     match command {
@@ -41,11 +32,31 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
     }
 }
 
-// An enumeration for available player types.
+// An enumeration for all available player types.
 #[derive(Clone, Copy, Debug)]
 enum Player {
     X,
     O,
+}
+
+// An enumeration for all available slot types.
+#[derive(Clone, Copy, PartialEq)]
+enum Slot {
+    Empty,
+    X,
+    O,
+}
+
+// A type for the game grid containing 3x3 slots.
+type Grid = [Slot; 9];
+
+// An enumeration of all available commands within the game.
+enum Command {
+    MainMenu,
+    TurnMenu(Grid, Player),
+    Victory(Grid, Player),
+    Draw(Grid),
+    Exit,
 }
 
 // The definition which player starts the game.
@@ -59,13 +70,6 @@ fn player_slot(player: &Player) -> Slot {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
-enum Slot {
-    Empty,
-    X,
-    O,
-}
-
 // Return the char presenting the slot.
 fn slot_char(slot: Slot) -> char {
     match slot {
@@ -74,9 +78,6 @@ fn slot_char(slot: Slot) -> char {
         Slot::X => 'X',
     }
 }
-
-// A type for the game grid containing 3x3 slots.
-type Grid = [Slot; 9];
 
 // Return a string representing the grid contents.
 fn grid_string(grid: &Grid) -> String {
