@@ -1,8 +1,7 @@
 use std::io;
-use tic_tac_toe::run;
 
 fn main() {
-    run(output, input)
+    tic_tac_toe::run(output, input)
 }
 
 // An output channel that simply writes a line to standard out.
