@@ -79,11 +79,11 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
     match command {
         Command::MainMenu => {
             output_main_menu(output);
-            handle_main_menu(input)
+            handle_main_menu(input().trim())
         }
         Command::TurnMenu(grid, player) => {
             output_turn_menu(output, grid, player);
-            handle_turn_menu(input, grid, player)
+            handle_turn_menu(input().trim(), grid, player)
         }
         Command::Victory(grid, player) => {
             output_victory(output, grid, player);
@@ -110,8 +110,8 @@ fn output_main_menu(output: fn(&str)) {
     output("[2] Quit");
 }
 
-fn handle_main_menu(input: fn() -> String) -> Vec<Command> {
-    match input().trim() {
+fn handle_main_menu(input: &str) -> Vec<Command> {
+    match input {
         "1" => vec![Command::TurnMenu([Slot::Empty; 9], STARTING_PLAYER)],
         "2" => vec![Command::Exit],
         _ => vec![Command::MainMenu],
@@ -125,8 +125,8 @@ fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
     output("Please enter a cell e.g. 'B2':");
 }
 
-fn handle_turn_menu(input: fn() -> String, grid: &Grid, player: &Player) -> Vec<Command> {
-    match input_to_slot_index(input().trim()) {
+fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Vec<Command> {
+    match input_to_slot_index(input) {
         Ok(val) => {
             if grid[val] == Slot::Empty {
                 let mut new_grid = grid.clone();
