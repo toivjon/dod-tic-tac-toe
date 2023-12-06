@@ -59,8 +59,25 @@ enum Command {
     Exit,
 }
 
-// The definition which player starts the game.
-const STARTING_PLAYER: Player = Player::O;
+// Render the visualization of the main menu.
+fn output_main_menu(output: fn(&str)) {
+    output("===================");
+    output("=== Tic-Tac-Toe ===");
+    output("===================");
+    output("");
+    output("Please enter a selection:");
+    output("[1] Play");
+    output("[2] Quit");
+}
+
+// Handle the input for the main menu.
+fn handle_main_menu(input: &str) -> Option<Command> {
+    match input {
+        "1" => Option::Some(Command::TurnMenu([Slot::Empty; 9], Player::O)),
+        "2" => Option::Some(Command::Exit),
+        _ => Option::Some(Command::MainMenu),
+    }
+}
 
 // Return the slot representing the player.
 fn player_slot(player: &Player) -> Slot {
@@ -98,23 +115,6 @@ fn grid_string(grid: &Grid) -> String {
     )
 }
 
-fn output_main_menu(output: fn(&str)) {
-    output("===================");
-    output("=== Tic-Tac-Toe ===");
-    output("===================");
-    output("");
-    output("Please enter a selection:");
-    output("[1] Play");
-    output("[2] Quit");
-}
-
-fn handle_main_menu(input: &str) -> Option<Command> {
-    match input {
-        "1" => Option::Some(Command::TurnMenu([Slot::Empty; 9], STARTING_PLAYER)),
-        "2" => Option::Some(Command::Exit),
-        _ => Option::Some(Command::MainMenu),
-    }
-}
 
 fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
     output(format!("Current turn: {:?}", player).as_str());
