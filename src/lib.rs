@@ -87,7 +87,7 @@ fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
     output("Please enter a cell e.g. 'B2':");
 }
 
-// Render the visualizationn of the grid.
+// Render the visualization of the grid.
 fn output_grid(output: fn(&str), grid: &Grid) {
     let chars = grid.map(slot_char);
     output("  | A | B | C |     ");
@@ -101,14 +101,6 @@ fn output_grid(output: fn(&str), grid: &Grid) {
     output("  | A | B | C |     ");
 }
 
-// Return the slot representing the player.
-fn player_slot(player: &Player) -> Slot {
-    match player {
-        Player::O => Slot::O,
-        Player::X => Slot::X,
-    }
-}
-
 // Return the char presenting the slot.
 fn slot_char(slot: Slot) -> char {
     match slot {
@@ -118,6 +110,7 @@ fn slot_char(slot: Slot) -> char {
     }
 }
 
+// Handle the input for the turn menu.
 fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Option<Command> {
     match input_to_slot_index(input) {
         Ok(val) => {
@@ -140,34 +133,6 @@ fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Option<Command
     }
 }
 
-fn output_victory(output: fn(&str), grid: &Grid, player: &Player) {
-    output_grid(output, &grid);
-    output("");
-    output(format!("Player {:?} wins the game! Congratulations!", player).as_str());
-}
-
-fn output_draw(output: fn(&str), grid: &Grid) {
-    output_grid(output, &grid);
-    output("");
-    output("Game ends in a draw! Better luck next time!");
-}
-
-enum GameState {
-    Victory,
-    Draw,
-    Unfinished,
-}
-
-fn game_state(grid: &Grid) -> GameState {
-    if has_win(grid) {
-        GameState::Victory
-    } else if has_free(grid) {
-        GameState::Unfinished
-    } else {
-        GameState::Draw
-    }
-}
-
 // Get the index of the slot that corresponds to provided player input.
 fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
     match input.trim() {
@@ -181,6 +146,32 @@ fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
         "B3" => Ok(7),
         "C3" => Ok(8),
         _ => Err("invalid input"),
+    }
+}
+
+// Return the slot representing the player.
+fn player_slot(player: &Player) -> Slot {
+    match player {
+        Player::O => Slot::O,
+        Player::X => Slot::X,
+    }
+}
+
+// An enumeration of all possible game states.
+enum GameState {
+    Victory,
+    Draw,
+    Unfinished,
+}
+
+// Check the current state of the grid.
+fn game_state(grid: &Grid) -> GameState {
+    if has_win(grid) {
+        GameState::Victory
+    } else if has_free(grid) {
+        GameState::Unfinished
+    } else {
+        GameState::Draw
     }
 }
 
@@ -199,6 +190,20 @@ fn has_win(grid: &Grid) -> bool {
 // Check whether the given grid contains a free cell.
 fn has_free(grid: &Grid) -> bool {
     grid.contains(&Slot::Empty)
+}
+
+// Render the visualization of the victory.
+fn output_victory(output: fn(&str), grid: &Grid, player: &Player) {
+    output_grid(output, &grid);
+    output("");
+    output(format!("Player {:?} wins the game! Congratulations!", player).as_str());
+}
+
+// Render the visualization of the draw.
+fn output_draw(output: fn(&str), grid: &Grid) {
+    output_grid(output, &grid);
+    output("");
+    output("Game ends in a draw! Better luck next time!");
 }
 
 #[cfg(test)]
