@@ -6,6 +6,41 @@ pub fn run(output: fn(&str), input: fn() -> String) {
     }
 }
 
+// An enumeration of all available commands within the game.
+enum Command {
+    MainMenu,
+    TurnMenu(Grid, Player),
+    Victory(Grid, Player),
+    Draw(Grid),
+    Exit,
+}
+
+// Execute the given command possibly leading into a next command to be executed.
+fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -> Option<Command> {
+    match command {
+        Command::MainMenu => {
+            output_main_menu(output);
+            handle_main_menu(input().trim())
+        }
+        Command::TurnMenu(grid, player) => {
+            output_turn_menu(output, grid, player);
+            handle_turn_menu(input().trim(), grid, player)
+        }
+        Command::Victory(grid, player) => {
+            output_victory(output, grid, player);
+            Option::Some(Command::Exit)
+        }
+        Command::Draw(grid) => {
+            output_draw(output, grid);
+            Option::Some(Command::Exit)
+        }
+        Command::Exit => {
+            output("Bye!");
+            Option::None
+        }
+    }
+}
+
 // An enumeration for available player types.
 #[derive(Clone, Copy, Debug)]
 enum Player {
@@ -60,39 +95,6 @@ fn grid_string(grid: &Grid) -> String {
 ",
         chars[0], chars[1], chars[2], chars[3], chars[4], chars[5], chars[6], chars[7], chars[8]
     )
-}
-
-enum Command {
-    MainMenu,
-    TurnMenu(Grid, Player),
-    Victory(Grid, Player),
-    Draw(Grid),
-    Exit,
-}
-
-fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -> Option<Command> {
-    match command {
-        Command::MainMenu => {
-            output_main_menu(output);
-            handle_main_menu(input().trim())
-        }
-        Command::TurnMenu(grid, player) => {
-            output_turn_menu(output, grid, player);
-            handle_turn_menu(input().trim(), grid, player)
-        }
-        Command::Victory(grid, player) => {
-            output_victory(output, grid, player);
-            Option::Some(Command::Exit)
-        }
-        Command::Draw(grid) => {
-            output_draw(output, grid);
-            Option::Some(Command::Exit)
-        }
-        Command::Exit => {
-            output("Bye!");
-            Option::None
-        }
-    }
 }
 
 fn output_main_menu(output: fn(&str)) {
