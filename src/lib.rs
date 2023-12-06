@@ -1,5 +1,17 @@
 use std::vec;
 
+// Run the game with the provided input and output channels.
+pub fn run(output: fn(&str), input: fn() -> String) {
+    let mut commands = Vec::new();
+    commands.extend(vec![Command::MainMenu]);
+    while !commands.is_empty() {
+        commands = commands
+            .iter()
+            .flat_map(|command| execute_command(command, output, input))
+            .collect();
+    }
+}
+
 // An enumeration for available player types.
 #[derive(Clone, Copy, Debug)]
 enum Player {
@@ -62,17 +74,6 @@ enum Command {
     Victory(Grid, Player),
     Draw(Grid),
     Exit,
-}
-
-pub fn run(output: fn(&str), input: fn() -> String) {
-    let mut commands = Vec::new();
-    commands.extend(vec![Command::MainMenu]);
-    while !commands.is_empty() {
-        commands = commands
-            .iter()
-            .flat_map(|command| execute_command(command, output, input))
-            .collect();
-    }
 }
 
 fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -> Vec<Command> {
