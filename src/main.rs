@@ -10,7 +10,7 @@ fn output(value: &str) {
     println!("{value}")
 }
 
-// An input channel that simple reads a line from standard in.
+// An input channel that simply reads a line from standard in.
 fn input() -> String {
     let mut input = String::new();
     match io::stdin().read_line(&mut input) {
