@@ -79,6 +79,28 @@ fn handle_main_menu(input: &str) -> Option<Command> {
     }
 }
 
+// Render the visualization of the turn menu.
+fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
+    output(format!("Current turn: {:?}", player).as_str());
+    output_grid(output, &grid);
+    output("");
+    output("Please enter a cell e.g. 'B2':");
+}
+
+// Render the visualizationn of the grid.
+fn output_grid(output: fn(&str), grid: &Grid) {
+    let chars = grid.map(slot_char);
+    output("  | A | B | C |     ");
+    output("------------------  ");
+    output(format!("1 | {} | {} | {} | 1", chars[0], chars[1], chars[2]).as_str());
+    output("------------------  ");
+    output(format!("2 | {} | {} | {} | 2", chars[3], chars[4], chars[5]).as_str());
+    output("------------------  ");
+    output(format!("3 | {} | {} | {} | 3", chars[6], chars[7], chars[8]).as_str());
+    output("------------------  ");
+    output("  | A | B | C |     ");
+}
+
 // Return the slot representing the player.
 fn player_slot(player: &Player) -> Slot {
     match player {
@@ -94,33 +116,6 @@ fn slot_char(slot: Slot) -> char {
         Slot::O => 'O',
         Slot::X => 'X',
     }
-}
-
-// Return a string representing the grid contents.
-fn grid_string(grid: &Grid) -> String {
-    let chars = grid.map(slot_char);
-    format!(
-        "
-  | A | B | C |
-------------------
-1 | {} | {} | {} | 1
-------------------
-2 | {} | {} | {} | 2
-------------------
-3 | {} | {} | {} | 3
-------------------
-  | A | B | C |  
-",
-        chars[0], chars[1], chars[2], chars[3], chars[4], chars[5], chars[6], chars[7], chars[8]
-    )
-}
-
-
-fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
-    output(format!("Current turn: {:?}", player).as_str());
-    output(format!("{}", grid_string(grid)).as_str());
-    output("");
-    output("Please enter a cell e.g. 'B2':");
 }
 
 fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Option<Command> {
@@ -146,13 +141,13 @@ fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Option<Command
 }
 
 fn output_victory(output: fn(&str), grid: &Grid, player: &Player) {
-    output(format!("{}", grid_string(grid)).as_str());
+    output_grid(output, &grid);
     output("");
     output(format!("Player {:?} wins the game! Congratulations!", player).as_str());
 }
 
 fn output_draw(output: fn(&str), grid: &Grid) {
-    output(format!("{}", grid_string(grid)).as_str());
+    output_grid(output, &grid);
     output("");
     output("Game ends in a draw! Better luck next time!");
 }
