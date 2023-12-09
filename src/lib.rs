@@ -11,7 +11,7 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
     match command {
         Command::MainMenu => {
             output_main_menu(output);
-            handle_main_menu(input().trim())
+            Option::Some(handle_main_menu(input().trim()))
         }
         Command::TurnMenu(grid, player) => {
             output_turn_menu(output, grid, player);
@@ -71,11 +71,11 @@ fn output_main_menu(output: fn(&str)) {
 }
 
 // Handle the input for the main menu.
-fn handle_main_menu(input: &str) -> Option<Command> {
+fn handle_main_menu(input: &str) -> Command {
     match input {
-        "1" => Option::Some(Command::TurnMenu([Slot::Empty; 9], Player::O)),
-        "2" => Option::Some(Command::Exit),
-        _ => Option::Some(Command::MainMenu),
+        "1" => Command::TurnMenu([Slot::Empty; 9], Player::O),
+        "2" => Command::Exit,
+        _ => Command::MainMenu,
     }
 }
 
