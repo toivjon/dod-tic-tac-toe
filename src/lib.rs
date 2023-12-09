@@ -115,8 +115,7 @@ fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Option<Command
     match input_to_slot_index(input) {
         Ok(val) => {
             if grid[val] == Slot::Empty {
-                let mut new_grid = grid.clone();
-                new_grid[val] = player_slot(player);
+                let new_grid = assign_grid_slot(grid, val, player_slot(player));
                 match game_state(&new_grid) {
                     GameState::Victory => Option::Some(Command::Victory(new_grid, *player)),
                     GameState::Draw => Option::Some(Command::Draw(new_grid)),
@@ -131,6 +130,13 @@ fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Option<Command
         }
         Err(_) => Option::Some(Command::TurnMenu(*grid, *player)),
     }
+}
+
+// TODO change idx into a type to avoid out-of-range indices.
+fn assign_grid_slot(grid: &Grid, idx: usize, slot: Slot) -> Grid {
+    let mut result = grid.clone();
+    result[idx] = slot;
+    return result;
 }
 
 // Get the index of the slot that corresponds to provided player input.
