@@ -15,7 +15,7 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
         }
         Command::TurnMenu(grid, player) => {
             output_turn_menu(output, grid, player);
-            handle_turn_menu(input().trim(), grid, player)
+            Option::Some(handle_turn_menu(input().trim(), grid, player))
         }
         Command::Victory(grid, player) => {
             output_victory(output, grid, player);
@@ -111,24 +111,24 @@ fn slot_char(slot: Slot) -> char {
 }
 
 // Handle the input for the turn menu.
-fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Option<Command> {
+fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Command {
     match input_to_slot_index(input) {
         Ok(val) => {
             if grid[val] == Slot::Empty {
                 let new_grid = assign_grid_slot(grid, val, player_slot(player));
                 match game_state(&new_grid) {
-                    GameState::Victory => Option::Some(Command::Victory(new_grid, *player)),
-                    GameState::Draw => Option::Some(Command::Draw(new_grid)),
+                    GameState::Victory => Command::Victory(new_grid, *player),
+                    GameState::Draw => Command::Draw(new_grid),
                     GameState::Unfinished => match player {
-                        Player::O => Option::Some(Command::TurnMenu(new_grid, Player::X)),
-                        Player::X => Option::Some(Command::TurnMenu(new_grid, Player::O)),
+                        Player::O => Command::TurnMenu(new_grid, Player::X),
+                        Player::X => Command::TurnMenu(new_grid, Player::O),
                     },
                 }
             } else {
-                Option::Some(Command::TurnMenu(*grid, *player))
+                Command::TurnMenu(*grid, *player)
             }
         }
-        Err(_) => Option::Some(Command::TurnMenu(*grid, *player)),
+        Err(_) => Command::TurnMenu(*grid, *player),
     }
 }
 
