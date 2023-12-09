@@ -119,10 +119,7 @@ fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Command {
                 match game_state(&new_grid) {
                     GameState::Victory => Command::Victory(new_grid, *player),
                     GameState::Draw => Command::Draw(new_grid),
-                    GameState::Unfinished => match player {
-                        Player::O => Command::TurnMenu(new_grid, Player::X),
-                        Player::X => Command::TurnMenu(new_grid, Player::O),
-                    },
+                    GameState::Unfinished => Command::TurnMenu(new_grid, opposite_player(*player)),
                 }
             } else {
                 Command::TurnMenu(*grid, *player)
@@ -137,6 +134,14 @@ fn assign_grid_slot(grid: &Grid, idx: usize, slot: Slot) -> Grid {
     let mut result = grid.clone();
     result[idx] = slot;
     return result;
+}
+
+// Return the opposite player for the given player.
+fn opposite_player(player: Player) -> Player {
+    match player {
+        Player::O => Player::X,
+        Player::X => Player::O,
+    }
 }
 
 // Get the index of the slot that corresponds to provided player input.
