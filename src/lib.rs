@@ -1,3 +1,8 @@
+use main_menu::Input;
+
+mod main_menu;
+mod turn_menu;
+
 // Run the game with the provided input and output channels.
 pub fn run(output: fn(&str), input: fn() -> String) {
     let mut command = Option::Some(Command::MainMenu);
@@ -11,11 +16,17 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
     match command {
         Command::MainMenu => {
             output_main_menu(output);
-            Option::Some(handle_main_menu(input().trim()))
+            Option::Some(handle_main_menu(
+                main_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
+            ))
         }
         Command::TurnMenu(grid, player) => {
             output_turn_menu(output, grid, player);
-            Option::Some(handle_turn_menu(input().trim(), grid, player))
+            Option::Some(handle_turn_menu(
+                turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
+                grid,
+                player,
+            ))
         }
         Command::Victory(grid, player) => {
             output_victory(output, grid, player);
@@ -71,11 +82,10 @@ fn output_main_menu(output: fn(&str)) {
 }
 
 // Handle the input for the main menu.
-fn handle_main_menu(input: &str) -> Command {
+fn handle_main_menu(input: Input) -> Command {
     match input {
-        "1" => Command::TurnMenu([Slot::Empty; 9], Player::O),
-        "2" => Command::Exit,
-        _ => Command::MainMenu,
+        Input::Start => Command::TurnMenu([Slot::Empty; 9], Player::O),
+        Input::Exit => Command::Exit,
     }
 }
 
@@ -111,21 +121,17 @@ fn slot_char(slot: Slot) -> char {
 }
 
 // Handle the input for the turn menu.
-fn handle_turn_menu(input: &str, grid: &Grid, player: &Player) -> Command {
-    match input_to_slot_index(input) {
-        Ok(val) => {
-            if grid[val] == Slot::Empty {
-                let new_grid = assign_grid_slot(grid, val, player_slot(player));
-                match game_state(&new_grid) {
-                    GameState::Victory => Command::Victory(new_grid, *player),
-                    GameState::Draw => Command::Draw(new_grid),
-                    GameState::Unfinished => Command::TurnMenu(new_grid, opposite_player(*player)),
-                }
-            } else {
-                Command::TurnMenu(*grid, *player)
-            }
+fn handle_turn_menu(input: turn_menu::Input, grid: &Grid, player: &Player) -> Command {
+    let index = turn_menu::input_index(input);
+    if grid[index] == Slot::Empty {
+        let new_grid = assign_grid_slot(grid, index, player_slot(player));
+        match game_state(&new_grid) {
+            GameState::Victory => Command::Victory(new_grid, *player),
+            GameState::Draw => Command::Draw(new_grid),
+            GameState::Unfinished => Command::TurnMenu(new_grid, opposite_player(*player)),
         }
-        Err(_) => Command::TurnMenu(*grid, *player),
+    } else {
+        Command::TurnMenu(*grid, *player)
     }
 }
 
@@ -141,22 +147,6 @@ fn opposite_player(player: Player) -> Player {
     match player {
         Player::O => Player::X,
         Player::X => Player::O,
-    }
-}
-
-// Get the index of the slot that corresponds to provided player input.
-fn input_to_slot_index(input: &str) -> Result<usize, &'static str> {
-    match input.trim() {
-        "A1" => Ok(0),
-        "B1" => Ok(1),
-        "C1" => Ok(2),
-        "A2" => Ok(3),
-        "B2" => Ok(4),
-        "C2" => Ok(5),
-        "A3" => Ok(6),
-        "B3" => Ok(7),
-        "C3" => Ok(8),
-        _ => Err("invalid input"),
     }
 }
 
@@ -222,30 +212,7 @@ mod tests {
 
     use crate::Slot::{Empty, O, X};
 
-    use crate::{has_free, has_win, input_to_slot_index};
-
-    #[test]
-    fn input_to_slot_index_returns_error_for_invalid_input() {
-        assert_eq!(input_to_slot_index("").is_err(), true);
-        assert_eq!(input_to_slot_index("A0").is_err(), true);
-        assert_eq!(input_to_slot_index("A4").is_err(), true);
-        assert_eq!(input_to_slot_index("D1").is_err(), true);
-        assert_eq!(input_to_slot_index("AA").is_err(), true);
-        assert_eq!(input_to_slot_index("11").is_err(), true);
-    }
-
-    #[test]
-    fn input_to_slot_index_returns_valid_indexes() {
-        assert_eq!(input_to_slot_index("A1").unwrap(), 0);
-        assert_eq!(input_to_slot_index("B1").unwrap(), 1);
-        assert_eq!(input_to_slot_index("C1").unwrap(), 2);
-        assert_eq!(input_to_slot_index("A2").unwrap(), 3);
-        assert_eq!(input_to_slot_index("B2").unwrap(), 4);
-        assert_eq!(input_to_slot_index("C2").unwrap(), 5);
-        assert_eq!(input_to_slot_index("A3").unwrap(), 6);
-        assert_eq!(input_to_slot_index("B3").unwrap(), 7);
-        assert_eq!(input_to_slot_index("C3").unwrap(), 8);
-    }
+    use crate::{has_free, has_win};
 
     #[test]
     fn has_win_returns_true_when_win() {
