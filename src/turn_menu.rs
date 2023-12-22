@@ -98,7 +98,7 @@ fn slot_char(slot: Slot) -> char {
 fn assign_grid_slot(grid: &Grid, idx: usize, slot: Slot) -> Grid {
     let mut result = grid.clone();
     result[idx] = slot;
-    return result;
+    result
 }
 
 // Return the opposite player for the given player.
