@@ -1,16 +1,37 @@
+use crate::Command;
+
+// A heading use to visualize the main menu.
+pub const HEADING: &str = "
+===================
+=== Tic-Tac-Toe ===
+===================
+
+Please enter a selection:
+[1] Play
+[2] Quit
+";
+
 // An enumeration of the main menu inputs.
 #[derive(Debug, PartialEq)]
 pub enum Input {
-    Start,
+    Play,
     Exit,
 }
 
 // Parse the main menu input from the provided input string.
 pub fn parse_input(input: &str) -> Result<Input, &'static str> {
     match input {
-        "1" => Ok(Input::Start),
+        "1" => Ok(Input::Play),
         "2" => Ok(Input::Exit),
         _ => Err("invalid input"),
+    }
+}
+
+// Handle the provided input to react on user input.
+pub fn handle_input(input: Input) -> Command {
+    match input {
+        Input::Play => Command::OpenTurnMenu,
+        Input::Exit => Command::Exit,
     }
 }
 
@@ -21,7 +42,7 @@ mod tests {
 
     #[test]
     fn parse_input_returns_ok_with_valid_input() {
-        assert_eq!(parse_input("1"), Ok(Input::Start));
+        assert_eq!(parse_input("1"), Ok(Input::Play));
         assert_eq!(parse_input("2"), Ok(Input::Exit));
     }
 
@@ -31,4 +52,6 @@ mod tests {
         assert_eq!(parse_input("0"), Err("invalid input"));
         assert_eq!(parse_input("3"), Err("invalid input"));
     }
+
+    // TODO handle_input unit tests
 }
