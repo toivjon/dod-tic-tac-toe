@@ -96,7 +96,7 @@ fn slot_char(slot: Slot) -> char {
 
 // TODO change idx into a type to avoid out-of-range indices.
 fn assign_grid_slot(grid: &Grid, idx: usize, slot: Slot) -> Grid {
-    let mut result = grid.clone();
+    let mut result = *grid;
     result[idx] = slot;
     result
 }
