@@ -66,7 +66,7 @@ pub enum Player {
 // Render the visualization of the turn menu.
 pub fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
     output(format!("Current turn: {:?}", player).as_str());
-    output_grid(output, &grid);
+    output_grid(output, grid);
     output("");
     output("Please enter a cell e.g. 'B2':");
 }
@@ -154,14 +154,14 @@ fn has_free(grid: &Grid) -> bool {
 
 // Render the visualization of the victory.
 pub fn output_victory(output: fn(&str), grid: &Grid, player: &Player) {
-    output_grid(output, &grid);
+    output_grid(output, grid);
     output("");
     output(format!("Player {:?} wins the game! Congratulations!", player).as_str());
 }
 
 // Render the visualization of the draw.
 pub fn output_draw(output: fn(&str), grid: &Grid) {
-    output_grid(output, &grid);
+    output_grid(output, grid);
     output("");
     output("Game ends in a draw! Better luck next time!");
 }
