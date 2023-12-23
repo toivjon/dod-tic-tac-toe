@@ -77,6 +77,18 @@ fn has_free(grid: &Grid) -> bool {
     grid.contains(&Slot::Empty)
 }
 
+// Check whether the given grid contains a winning line.
+fn has_win(grid: &Grid) -> bool {
+    (grid[0] != Slot::Empty && grid[0] == grid[1] && grid[1] == grid[2])
+        || (grid[3] != Slot::Empty && grid[3] == grid[4] && grid[4] == grid[5])
+        || (grid[6] != Slot::Empty && grid[6] == grid[7] && grid[7] == grid[8])
+        || (grid[0] != Slot::Empty && grid[0] == grid[3] && grid[3] == grid[6])
+        || (grid[1] != Slot::Empty && grid[1] == grid[4] && grid[4] == grid[7])
+        || (grid[2] != Slot::Empty && grid[2] == grid[5] && grid[5] == grid[8])
+        || (grid[0] != Slot::Empty && grid[0] == grid[4] && grid[4] == grid[8])
+        || (grid[2] != Slot::Empty && grid[2] == grid[4] && grid[4] == grid[6])
+}
+
 // An enumeration for all available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Player {
@@ -98,18 +110,6 @@ fn player_slot(player: &Player) -> Slot {
         Player::O => Slot::O,
         Player::X => Slot::X,
     }
-}
-
-// Check whether the given grid contains a winning line.
-fn has_win(grid: &Grid) -> bool {
-    (grid[0] != Slot::Empty && grid[0] == grid[1] && grid[1] == grid[2])
-        || (grid[3] != Slot::Empty && grid[3] == grid[4] && grid[4] == grid[5])
-        || (grid[6] != Slot::Empty && grid[6] == grid[7] && grid[7] == grid[8])
-        || (grid[0] != Slot::Empty && grid[0] == grid[3] && grid[3] == grid[6])
-        || (grid[1] != Slot::Empty && grid[1] == grid[4] && grid[4] == grid[7])
-        || (grid[2] != Slot::Empty && grid[2] == grid[5] && grid[5] == grid[8])
-        || (grid[0] != Slot::Empty && grid[0] == grid[4] && grid[4] == grid[8])
-        || (grid[2] != Slot::Empty && grid[2] == grid[4] && grid[4] == grid[6])
 }
 
 // Handle the provided input to react on user input.
@@ -284,18 +284,6 @@ mod tests {
     }
 
     #[test]
-    fn opposite_player_returns_correct_player() {
-        assert_eq!(opposite_player(Player::O), Player::X);
-        assert_eq!(opposite_player(Player::X), Player::O);
-    }
-
-    #[test]
-    fn player_slot_returns_correct_slot() {
-        assert_eq!(player_slot(&Player::X), X);
-        assert_eq!(player_slot(&Player::O), O);
-    }
-
-    #[test]
     fn has_win_returns_true_when_win() {
         assert!(has_win(&[
             X, X, X, Empty, Empty, Empty, Empty, Empty, Empty
@@ -349,5 +337,17 @@ mod tests {
         assert!(!has_win(&[
             Empty, Empty, X, Empty, O, Empty, X, Empty, Empty
         ]));
+    }
+
+    #[test]
+    fn opposite_player_returns_correct_player() {
+        assert_eq!(opposite_player(Player::O), Player::X);
+        assert_eq!(opposite_player(Player::X), Player::O);
+    }
+
+    #[test]
+    fn player_slot_returns_correct_slot() {
+        assert_eq!(player_slot(&Player::X), X);
+        assert_eq!(player_slot(&Player::O), O);
     }
 }
