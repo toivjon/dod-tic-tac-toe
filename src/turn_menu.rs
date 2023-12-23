@@ -87,6 +87,14 @@ fn opposite_player(player: Player) -> Player {
     }
 }
 
+// Return the slot representing the player.
+fn player_slot(player: &Player) -> Slot {
+    match player {
+        Player::O => Slot::O,
+        Player::X => Slot::X,
+    }
+}
+
 // Render the visualization of the turn menu.
 pub fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
     output(format!("Current turn: {:?}", player).as_str());
@@ -107,14 +115,6 @@ fn output_grid(output: fn(&str), grid: &Grid) {
     output(format!("3 | {} | {} | {} | 3", chars[6], chars[7], chars[8]).as_str());
     output("------------------  ");
     output("  | A | B | C |     ");
-}
-
-// Return the slot representing the player.
-fn player_slot(player: &Player) -> Slot {
-    match player {
-        Player::O => Slot::O,
-        Player::X => Slot::X,
-    }
 }
 
 // An enumeration of all possible game states.
@@ -184,7 +184,8 @@ pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
 mod tests {
 
     use crate::turn_menu::{
-        input_index, opposite_player, parse_input, slot_char, update_grid, Input, Player, Slot,
+        input_index, opposite_player, parse_input, player_slot, slot_char, update_grid, Input,
+        Player, Slot,
     };
 
     use crate::turn_menu::Slot::{Empty, O, X};
@@ -276,6 +277,12 @@ mod tests {
     fn opposite_player_returns_correct_player() {
         assert_eq!(opposite_player(Player::O), Player::X);
         assert_eq!(opposite_player(Player::X), Player::O);
+    }
+
+    #[test]
+    fn player_slot_returns_correct_slot() {
+        assert_eq!(player_slot(&Player::X), X);
+        assert_eq!(player_slot(&Player::O), O);
     }
 
     #[test]
