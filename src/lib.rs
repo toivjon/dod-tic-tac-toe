@@ -33,7 +33,7 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
             let player = turn_menu::Player::O;
             turn_menu::output_turn_menu(output, &grid, &player);
             Option::Some(turn_menu::handle_input(
-                turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
+                &turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
                 &grid,
                 &player,
             ))
@@ -41,7 +41,7 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
         Command::TurnMenu(grid, player) => {
             turn_menu::output_turn_menu(output, grid, player);
             Option::Some(turn_menu::handle_input(
-                turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
+                &turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
                 grid,
                 player,
             ))

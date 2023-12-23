@@ -31,7 +31,7 @@ pub fn parse_input(input: &str) -> Result<Input, &'static str> {
 }
 
 // Get the corresponding grid index for the provided input.
-fn input_index(input: Input) -> usize {
+fn input_index(input: &Input) -> usize {
     match input {
         Input::A1 => 0,
         Input::B1 => 1,
@@ -65,6 +65,13 @@ fn slot_char(slot: Slot) -> char {
 // A type for the game grid containing 3x3 slots.
 pub type Grid = [Slot; 9];
 
+// Build a new grid where the slot in the target index has been updated.
+fn update_grid(grid: &Grid, input: &Input, slot: Slot) -> Grid {
+    let mut result = *grid;
+    result[input_index(input)] = slot;
+    result
+}
+
 // An enumeration for all available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Player {
@@ -92,13 +99,6 @@ fn output_grid(output: fn(&str), grid: &Grid) {
     output(format!("3 | {} | {} | {} | 3", chars[6], chars[7], chars[8]).as_str());
     output("------------------  ");
     output("  | A | B | C |     ");
-}
-
-// TODO change idx into a type to avoid out-of-range indices.
-fn assign_grid_slot(grid: &Grid, idx: usize, slot: Slot) -> Grid {
-    let mut result = *grid;
-    result[idx] = slot;
-    result
 }
 
 // Return the opposite player for the given player.
@@ -167,10 +167,9 @@ pub fn output_draw(output: fn(&str), grid: &Grid) {
 }
 
 // Handle the provided input to react on user input.
-pub fn handle_input(input: Input, grid: &Grid, player: &Player) -> Command {
-    let index = input_index(input);
-    if grid[index] == Slot::Empty {
-        let new_grid = assign_grid_slot(grid, index, player_slot(player));
+pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
+    if grid[input_index(input)] == Slot::Empty {
+        let new_grid = update_grid(grid, input, player_slot(player));
         match game_state(&new_grid) {
             GameState::Victory => Command::Victory(new_grid, *player),
             GameState::Draw => Command::Draw(new_grid),
@@ -184,7 +183,7 @@ pub fn handle_input(input: Input, grid: &Grid, player: &Player) -> Command {
 #[cfg(test)]
 mod tests {
 
-    use crate::turn_menu::{input_index, parse_input, slot_char, Input, Slot};
+    use crate::turn_menu::{input_index, parse_input, slot_char, update_grid, Input, Slot};
 
     use crate::turn_menu::Slot::{Empty, O, X};
 
@@ -213,22 +212,62 @@ mod tests {
 
     #[test]
     fn input_index_returns_correct_indices() {
-        assert_eq!(input_index(Input::A1), 0);
-        assert_eq!(input_index(Input::B1), 1);
-        assert_eq!(input_index(Input::C1), 2);
-        assert_eq!(input_index(Input::A2), 3);
-        assert_eq!(input_index(Input::B2), 4);
-        assert_eq!(input_index(Input::C2), 5);
-        assert_eq!(input_index(Input::A3), 6);
-        assert_eq!(input_index(Input::B3), 7);
-        assert_eq!(input_index(Input::C3), 8);
+        assert_eq!(input_index(&Input::A1), 0);
+        assert_eq!(input_index(&Input::B1), 1);
+        assert_eq!(input_index(&Input::C1), 2);
+        assert_eq!(input_index(&Input::A2), 3);
+        assert_eq!(input_index(&Input::B2), 4);
+        assert_eq!(input_index(&Input::C2), 5);
+        assert_eq!(input_index(&Input::A3), 6);
+        assert_eq!(input_index(&Input::B3), 7);
+        assert_eq!(input_index(&Input::C3), 8);
     }
 
     #[test]
     fn slot_char_returns_correct_chars() {
-        assert_eq!(slot_char(Slot::Empty), ' ');
-        assert_eq!(slot_char(Slot::X), 'X');
-        assert_eq!(slot_char(Slot::O), 'O');
+        assert_eq!(slot_char(Empty), ' ');
+        assert_eq!(slot_char(X), 'X');
+        assert_eq!(slot_char(O), 'O');
+    }
+
+    #[test]
+    fn update_grid_returns_updated_grid() {
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::A1, Slot::X),
+            [X, Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty]
+        );
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::B1, Slot::X),
+            [Empty, X, Empty, Empty, Empty, Empty, Empty, Empty, Empty]
+        );
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::C1, Slot::X),
+            [Empty, Empty, X, Empty, Empty, Empty, Empty, Empty, Empty]
+        );
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::A2, Slot::X),
+            [Empty, Empty, Empty, X, Empty, Empty, Empty, Empty, Empty]
+        );
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::B2, Slot::X),
+            [Empty, Empty, Empty, Empty, X, Empty, Empty, Empty, Empty]
+        );
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::C2, Slot::X),
+            [Empty, Empty, Empty, Empty, Empty, X, Empty, Empty, Empty]
+        );
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::A3, Slot::X),
+            [Empty, Empty, Empty, Empty, Empty, Empty, X, Empty, Empty]
+        );
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::B3, Slot::X),
+            [Empty, Empty, Empty, Empty, Empty, Empty, Empty, X, Empty]
+        );
+        assert_eq!(
+            update_grid(&[Empty; 9], &Input::C3, Slot::X),
+            [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, X]
+        );
     }
 
     #[test]
