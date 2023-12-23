@@ -79,6 +79,14 @@ pub enum Player {
     O,
 }
 
+// Return the opposite player for the given player.
+fn opposite_player(player: Player) -> Player {
+    match player {
+        Player::O => Player::X,
+        Player::X => Player::O,
+    }
+}
+
 // Render the visualization of the turn menu.
 pub fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
     output(format!("Current turn: {:?}", player).as_str());
@@ -99,14 +107,6 @@ fn output_grid(output: fn(&str), grid: &Grid) {
     output(format!("3 | {} | {} | {} | 3", chars[6], chars[7], chars[8]).as_str());
     output("------------------  ");
     output("  | A | B | C |     ");
-}
-
-// Return the opposite player for the given player.
-fn opposite_player(player: Player) -> Player {
-    match player {
-        Player::O => Player::X,
-        Player::X => Player::O,
-    }
 }
 
 // Return the slot representing the player.
@@ -183,7 +183,9 @@ pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
 #[cfg(test)]
 mod tests {
 
-    use crate::turn_menu::{input_index, parse_input, slot_char, update_grid, Input, Slot};
+    use crate::turn_menu::{
+        input_index, opposite_player, parse_input, slot_char, update_grid, Input, Player, Slot,
+    };
 
     use crate::turn_menu::Slot::{Empty, O, X};
 
@@ -268,6 +270,12 @@ mod tests {
             update_grid(&[Empty; 9], &Input::C3, Slot::X),
             [Empty, Empty, Empty, Empty, Empty, Empty, Empty, Empty, X]
         );
+    }
+
+    #[test]
+    fn opposite_player_returns_correct_player() {
+        assert_eq!(opposite_player(Player::O), Player::X);
+        assert_eq!(opposite_player(Player::X), Player::O);
     }
 
     #[test]
