@@ -72,6 +72,11 @@ fn update_grid(grid: &Grid, input: &Input, slot: Slot) -> Grid {
     result
 }
 
+// Check whether the given grid contains a free cell.
+fn has_free(grid: &Grid) -> bool {
+    grid.contains(&Slot::Empty)
+}
+
 // An enumeration for all available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Player {
@@ -93,28 +98,6 @@ fn player_slot(player: &Player) -> Slot {
         Player::O => Slot::O,
         Player::X => Slot::X,
     }
-}
-
-// Render the visualization of the turn menu.
-pub fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
-    output(format!("Current turn: {:?}", player).as_str());
-    output_grid(output, grid);
-    output("");
-    output("Please enter a cell e.g. 'B2':");
-}
-
-// Render the visualization of the grid.
-fn output_grid(output: fn(&str), grid: &Grid) {
-    let chars = grid.map(slot_char);
-    output("  | A | B | C |     ");
-    output("------------------  ");
-    output(format!("1 | {} | {} | {} | 1", chars[0], chars[1], chars[2]).as_str());
-    output("------------------  ");
-    output(format!("2 | {} | {} | {} | 2", chars[3], chars[4], chars[5]).as_str());
-    output("------------------  ");
-    output(format!("3 | {} | {} | {} | 3", chars[6], chars[7], chars[8]).as_str());
-    output("------------------  ");
-    output("  | A | B | C |     ");
 }
 
 // An enumeration of all possible game states.
@@ -147,9 +130,40 @@ fn has_win(grid: &Grid) -> bool {
         || (grid[2] != Slot::Empty && grid[2] == grid[4] && grid[4] == grid[6])
 }
 
-// Check whether the given grid contains a free cell.
-fn has_free(grid: &Grid) -> bool {
-    grid.contains(&Slot::Empty)
+// Handle the provided input to react on user input.
+pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
+    if grid[input_index(input)] == Slot::Empty {
+        let new_grid = update_grid(grid, input, player_slot(player));
+        match game_state(&new_grid) {
+            GameState::Victory => Command::Victory(new_grid, *player),
+            GameState::Draw => Command::Draw(new_grid),
+            GameState::Unfinished => Command::TurnMenu(new_grid, opposite_player(*player)),
+        }
+    } else {
+        Command::TurnMenu(*grid, *player)
+    }
+}
+
+// Render the visualization of the turn menu.
+pub fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
+    output(format!("Current turn: {:?}", player).as_str());
+    output_grid(output, grid);
+    output("");
+    output("Please enter a cell e.g. 'B2':");
+}
+
+// Render the visualization of the grid.
+fn output_grid(output: fn(&str), grid: &Grid) {
+    let chars = grid.map(slot_char);
+    output("  | A | B | C |     ");
+    output("------------------  ");
+    output(format!("1 | {} | {} | {} | 1", chars[0], chars[1], chars[2]).as_str());
+    output("------------------  ");
+    output(format!("2 | {} | {} | {} | 2", chars[3], chars[4], chars[5]).as_str());
+    output("------------------  ");
+    output(format!("3 | {} | {} | {} | 3", chars[6], chars[7], chars[8]).as_str());
+    output("------------------  ");
+    output("  | A | B | C |     ");
 }
 
 // Render the visualization of the victory.
@@ -164,20 +178,6 @@ pub fn output_draw(output: fn(&str), grid: &Grid) {
     output_grid(output, grid);
     output("");
     output("Game ends in a draw! Better luck next time!");
-}
-
-// Handle the provided input to react on user input.
-pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
-    if grid[input_index(input)] == Slot::Empty {
-        let new_grid = update_grid(grid, input, player_slot(player));
-        match game_state(&new_grid) {
-            GameState::Victory => Command::Victory(new_grid, *player),
-            GameState::Draw => Command::Draw(new_grid),
-            GameState::Unfinished => Command::TurnMenu(new_grid, opposite_player(*player)),
-        }
-    } else {
-        Command::TurnMenu(*grid, *player)
-    }
 }
 
 #[cfg(test)]
@@ -274,6 +274,32 @@ mod tests {
     }
 
     #[test]
+    fn has_free_returns_true_when_free_cell_exists() {
+        assert!(has_free(&[Empty, X, X, X, X, X, X, X, X]));
+        assert!(has_free(&[X, Empty, X, X, X, X, X, X, X]));
+        assert!(has_free(&[X, X, Empty, X, X, X, X, X, X]));
+        assert!(has_free(&[X, X, X, Empty, X, X, X, X, X]));
+        assert!(has_free(&[X, X, X, X, Empty, X, X, X, X]));
+        assert!(has_free(&[X, X, X, X, X, Empty, X, X, X]));
+        assert!(has_free(&[X, X, X, X, X, X, Empty, X, X]));
+        assert!(has_free(&[X, X, X, X, X, X, X, Empty, X]));
+        assert!(has_free(&[X, X, X, X, X, X, X, X, Empty]));
+    }
+
+    #[test]
+    fn has_free_returns_false_when_no_free_cell_exists() {
+        assert!(!has_free(&[O, X, X, X, X, X, X, X, X]));
+        assert!(!has_free(&[X, O, X, X, X, X, X, X, X]));
+        assert!(!has_free(&[X, X, O, X, X, X, X, X, X]));
+        assert!(!has_free(&[X, X, X, O, X, X, X, X, X]));
+        assert!(!has_free(&[X, X, X, X, O, X, X, X, X]));
+        assert!(!has_free(&[X, X, X, X, X, O, X, X, X]));
+        assert!(!has_free(&[X, X, X, X, X, X, O, X, X]));
+        assert!(!has_free(&[X, X, X, X, X, X, X, O, X]));
+        assert!(!has_free(&[X, X, X, X, X, X, X, X, O]));
+    }
+
+    #[test]
     fn opposite_player_returns_correct_player() {
         assert_eq!(opposite_player(Player::O), Player::X);
         assert_eq!(opposite_player(Player::X), Player::O);
@@ -339,31 +365,5 @@ mod tests {
         assert!(!has_win(&[
             Empty, Empty, X, Empty, O, Empty, X, Empty, Empty
         ]));
-    }
-
-    #[test]
-    fn has_free_returns_true_when_free_cell_exists() {
-        assert!(has_free(&[Empty, X, X, X, X, X, X, X, X]));
-        assert!(has_free(&[X, Empty, X, X, X, X, X, X, X]));
-        assert!(has_free(&[X, X, Empty, X, X, X, X, X, X]));
-        assert!(has_free(&[X, X, X, Empty, X, X, X, X, X]));
-        assert!(has_free(&[X, X, X, X, Empty, X, X, X, X]));
-        assert!(has_free(&[X, X, X, X, X, Empty, X, X, X]));
-        assert!(has_free(&[X, X, X, X, X, X, Empty, X, X]));
-        assert!(has_free(&[X, X, X, X, X, X, X, Empty, X]));
-        assert!(has_free(&[X, X, X, X, X, X, X, X, Empty]));
-    }
-
-    #[test]
-    fn has_free_returns_false_when_no_free_cell_exists() {
-        assert!(!has_free(&[O, X, X, X, X, X, X, X, X]));
-        assert!(!has_free(&[X, O, X, X, X, X, X, X, X]));
-        assert!(!has_free(&[X, X, O, X, X, X, X, X, X]));
-        assert!(!has_free(&[X, X, X, O, X, X, X, X, X]));
-        assert!(!has_free(&[X, X, X, X, O, X, X, X, X]));
-        assert!(!has_free(&[X, X, X, X, X, O, X, X, X]));
-        assert!(!has_free(&[X, X, X, X, X, X, O, X, X]));
-        assert!(!has_free(&[X, X, X, X, X, X, X, O, X]));
-        assert!(!has_free(&[X, X, X, X, X, X, X, X, O]));
     }
 }
