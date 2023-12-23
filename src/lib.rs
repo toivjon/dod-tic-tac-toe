@@ -2,6 +2,7 @@ mod main_menu;
 mod turn_menu;
 
 // An enumeration of all available commands within the game.
+#[derive(Debug, PartialEq)]
 pub enum Command {
     MainMenu,
     OpenTurnMenu,

@@ -38,7 +38,10 @@ pub fn handle_input(input: Input) -> Command {
 #[cfg(test)]
 mod tests {
 
-    use crate::main_menu::{parse_input, Input};
+    use crate::{
+        main_menu::{handle_input, parse_input, Input},
+        Command,
+    };
 
     #[test]
     fn parse_input_returns_ok_with_valid_input() {
@@ -53,5 +56,10 @@ mod tests {
         assert_eq!(parse_input("3"), Err("invalid input"));
     }
 
-    // TODO handle_input unit tests
+    #[test]
+    fn handle_input_returns_commands() {
+        assert_eq!(handle_input(Input::Play), Command::OpenTurnMenu);
+        assert_eq!(handle_input(Input::Exit), Command::Exit);
+    }
+    
 }

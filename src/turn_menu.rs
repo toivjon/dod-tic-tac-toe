@@ -46,7 +46,7 @@ fn input_index(input: Input) -> usize {
 }
 
 // An enumeration for all available slot types.
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Slot {
     Empty,
     X,
@@ -57,7 +57,7 @@ pub enum Slot {
 pub type Grid = [Slot; 9];
 
 // An enumeration for all available player types.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Player {
     X,
     O,
