@@ -100,24 +100,6 @@ fn player_slot(player: &Player) -> Slot {
     }
 }
 
-// An enumeration of all possible game states.
-enum GameState {
-    Victory,
-    Draw,
-    Unfinished,
-}
-
-// Check the current state of the grid.
-fn game_state(grid: &Grid) -> GameState {
-    if has_win(grid) {
-        GameState::Victory
-    } else if has_free(grid) {
-        GameState::Unfinished
-    } else {
-        GameState::Draw
-    }
-}
-
 // Check whether the given grid contains a winning line.
 fn has_win(grid: &Grid) -> bool {
     (grid[0] != Slot::Empty && grid[0] == grid[1] && grid[1] == grid[2])
@@ -134,10 +116,12 @@ fn has_win(grid: &Grid) -> bool {
 pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
     if grid[input_index(input)] == Slot::Empty {
         let new_grid = update_grid(grid, input, player_slot(player));
-        match game_state(&new_grid) {
-            GameState::Victory => Command::Victory(new_grid, *player),
-            GameState::Draw => Command::Draw(new_grid),
-            GameState::Unfinished => Command::TurnMenu(new_grid, opposite_player(*player)),
+        if has_win(&new_grid) {
+            Command::Victory(new_grid, *player)
+        } else if has_free(&new_grid) {
+            Command::TurnMenu(new_grid, opposite_player(*player))
+        } else {
+            Command::Draw(new_grid)
         }
     } else {
         Command::TurnMenu(*grid, *player)
