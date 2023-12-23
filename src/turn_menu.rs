@@ -53,6 +53,15 @@ pub enum Slot {
     O,
 }
 
+// Return the char presenting the slot.
+fn slot_char(slot: Slot) -> char {
+    match slot {
+        Slot::Empty => ' ',
+        Slot::O => 'O',
+        Slot::X => 'X',
+    }
+}
+
 // A type for the game grid containing 3x3 slots.
 pub type Grid = [Slot; 9];
 
@@ -83,15 +92,6 @@ fn output_grid(output: fn(&str), grid: &Grid) {
     output(format!("3 | {} | {} | {} | 3", chars[6], chars[7], chars[8]).as_str());
     output("------------------  ");
     output("  | A | B | C |     ");
-}
-
-// Return the char presenting the slot.
-fn slot_char(slot: Slot) -> char {
-    match slot {
-        Slot::Empty => ' ',
-        Slot::O => 'O',
-        Slot::X => 'X',
-    }
 }
 
 // TODO change idx into a type to avoid out-of-range indices.
@@ -184,7 +184,7 @@ pub fn handle_input(input: Input, grid: &Grid, player: &Player) -> Command {
 #[cfg(test)]
 mod tests {
 
-    use crate::turn_menu::{input_index, parse_input, Input};
+    use crate::turn_menu::{input_index, parse_input, slot_char, Input, Slot};
 
     use crate::turn_menu::Slot::{Empty, O, X};
 
@@ -222,6 +222,13 @@ mod tests {
         assert_eq!(input_index(Input::A3), 6);
         assert_eq!(input_index(Input::B3), 7);
         assert_eq!(input_index(Input::C3), 8);
+    }
+
+    #[test]
+    fn slot_char_returns_correct_chars() {
+        assert_eq!(slot_char(Slot::Empty), ' ');
+        assert_eq!(slot_char(Slot::X), 'X');
+        assert_eq!(slot_char(Slot::O), 'O');
     }
 
     #[test]
