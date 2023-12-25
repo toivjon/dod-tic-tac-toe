@@ -39,7 +39,7 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
             ))
         }
         Command::TurnMenu(grid, player) => {
-            output(turn_menu::turn_menu_string(&grid, &player).as_str());
+            output(turn_menu::turn_menu_string(grid, player).as_str());
             Option::Some(turn_menu::handle_input(
                 &turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
                 grid,
