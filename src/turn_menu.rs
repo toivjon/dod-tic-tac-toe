@@ -89,6 +89,22 @@ fn has_win(grid: &Grid) -> bool {
         || (grid[2] != Slot::Empty && grid[2] == grid[4] && grid[4] == grid[6])
 }
 
+// Get the string representation of the target grid.
+fn grid_string(grid: &Grid) -> String {
+    let slots = grid.map(slot_char);
+    let mut result = String::new();
+    result += "  | A | B | C |  \n";
+    result += "-----------------\n";
+    result += format!("1 | {} | {} | {} | 1\n", slots[0], slots[1], slots[2]).as_str();
+    result += "-----------------\n";
+    result += format!("2 | {} | {} | {} | 2\n", slots[3], slots[4], slots[5]).as_str();
+    result += "-----------------\n";
+    result += format!("3 | {} | {} | {} | 3\n", slots[6], slots[7], slots[8]).as_str();
+    result += "-----------------\n";
+    result += "  | A | B | C |  ";
+    result
+}
+
 // An enumeration for all available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Player {
@@ -131,35 +147,21 @@ pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
 // Render the visualization of the turn menu.
 pub fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
     output(format!("Current turn: {:?}", player).as_str());
-    output_grid(output, grid);
+    output(grid_string(grid).as_str());
     output("");
     output("Please enter a cell e.g. 'B2':");
 }
 
-// Render the visualization of the grid.
-fn output_grid(output: fn(&str), grid: &Grid) {
-    let chars = grid.map(slot_char);
-    output("  | A | B | C |     ");
-    output("------------------  ");
-    output(format!("1 | {} | {} | {} | 1", chars[0], chars[1], chars[2]).as_str());
-    output("------------------  ");
-    output(format!("2 | {} | {} | {} | 2", chars[3], chars[4], chars[5]).as_str());
-    output("------------------  ");
-    output(format!("3 | {} | {} | {} | 3", chars[6], chars[7], chars[8]).as_str());
-    output("------------------  ");
-    output("  | A | B | C |     ");
-}
-
 // Render the visualization of the victory.
 pub fn output_victory(output: fn(&str), grid: &Grid, player: &Player) {
-    output_grid(output, grid);
+    output(grid_string(grid).as_str());
     output("");
     output(format!("Player {:?} wins the game! Congratulations!", player).as_str());
 }
 
 // Render the visualization of the draw.
 pub fn output_draw(output: fn(&str), grid: &Grid) {
-    output_grid(output, grid);
+    output(grid_string(grid).as_str());
     output("");
     output("Game ends in a draw! Better luck next time!");
 }
@@ -168,8 +170,8 @@ pub fn output_draw(output: fn(&str), grid: &Grid) {
 mod tests {
 
     use crate::turn_menu::{
-        input_index, opposite_player, parse_input, player_slot, slot_char, update_grid, Input,
-        Player, Slot,
+        grid_string, input_index, opposite_player, parse_input, player_slot, slot_char,
+        update_grid, Input, Player, Slot,
     };
 
     use crate::turn_menu::Slot::{Empty, O, X};
@@ -337,6 +339,46 @@ mod tests {
         assert!(!has_win(&[
             Empty, Empty, X, Empty, O, Empty, X, Empty, Empty
         ]));
+    }
+
+    #[test]
+    fn grid_string_returns_correct_grid() {
+        assert_eq!(
+            grid_string(&[Empty; 9]),
+            "  | A | B | C |  
+-----------------
+1 |   |   |   | 1
+-----------------
+2 |   |   |   | 2
+-----------------
+3 |   |   |   | 3
+-----------------
+  | A | B | C |  "
+        );
+        assert_eq!(
+            grid_string(&[X, O, X, O, X, O, X, O, X]),
+            "  | A | B | C |  
+-----------------
+1 | X | O | X | 1
+-----------------
+2 | O | X | O | 2
+-----------------
+3 | X | O | X | 3
+-----------------
+  | A | B | C |  "
+        );
+        assert_eq!(
+            grid_string(&[O, X, O, X, O, X, O, X, O]),
+            "  | A | B | C |  
+-----------------
+1 | O | X | O | 1
+-----------------
+2 | X | O | X | 2
+-----------------
+3 | O | X | O | 3
+-----------------
+  | A | B | C |  "
+        );
     }
 
     #[test]
