@@ -31,7 +31,7 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
         Command::OpenTurnMenu => {
             let grid = [turn_menu::Slot::Empty; 9];
             let player = turn_menu::Player::O;
-            turn_menu::output_turn_menu(output, &grid, &player);
+            output(turn_menu::turn_menu_string(&grid, &player).as_str());
             Option::Some(turn_menu::handle_input(
                 &turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
                 &grid,
@@ -39,7 +39,7 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
             ))
         }
         Command::TurnMenu(grid, player) => {
-            turn_menu::output_turn_menu(output, grid, player);
+            output(turn_menu::turn_menu_string(&grid, &player).as_str());
             Option::Some(turn_menu::handle_input(
                 &turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
                 grid,
@@ -47,11 +47,11 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
             ))
         }
         Command::Victory(grid, player) => {
-            turn_menu::output_victory(output, grid, player);
+            output(turn_menu::victory_string(grid, player).as_str());
             Option::Some(Command::Exit)
         }
         Command::Draw(grid) => {
-            turn_menu::output_draw(output, grid);
+            output(turn_menu::draw_string(grid).as_str());
             Option::Some(Command::Exit)
         }
         Command::Exit => {

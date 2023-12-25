@@ -144,26 +144,32 @@ pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
     }
 }
 
-// Render the visualization of the turn menu.
-pub fn output_turn_menu(output: fn(&str), grid: &Grid, player: &Player) {
-    output(format!("Current turn: {:?}", player).as_str());
-    output(grid_string(grid).as_str());
-    output("");
-    output("Please enter a cell e.g. 'B2':");
+// Get the string representation of the turn menu.
+pub fn turn_menu_string(grid: &Grid, player: &Player) -> String {
+    let mut result = String::new();
+    result += format!("Current turn: {:?}\n\n", player).as_str();
+    result += grid_string(grid).as_str();
+    result += "\n\n";
+    result += "Please enter a cell e.g. 'B2':\n";
+    result
 }
 
-// Render the visualization of the victory.
-pub fn output_victory(output: fn(&str), grid: &Grid, player: &Player) {
-    output(grid_string(grid).as_str());
-    output("");
-    output(format!("Player {:?} wins the game! Congratulations!", player).as_str());
+// Get the string representation of the game victory.
+pub fn victory_string(grid: &Grid, player: &Player) -> String {
+    let mut result = String::new();
+    result += grid_string(grid).as_str();
+    result += "\n\n";
+    result += format!("Player {:?} wins the game! Congratulations!\n", player).as_str();
+    result
 }
 
-// Render the visualization of the draw.
-pub fn output_draw(output: fn(&str), grid: &Grid) {
-    output(grid_string(grid).as_str());
-    output("");
-    output("Game ends in a draw! Better luck next time!");
+// Get the string representation of the game draw.
+pub fn draw_string(grid: &Grid) -> String {
+    let mut result = String::new();
+    result += grid_string(grid).as_str();
+    result += "\n\n";
+    result += "Game ends in a draw! Better luck next time!";
+    result
 }
 
 #[cfg(test)]
