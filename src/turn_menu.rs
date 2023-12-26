@@ -2,7 +2,7 @@ use crate::Command;
 
 // An enumeration of the main menu inputs.
 #[derive(Debug, PartialEq)]
-pub enum Input {
+enum Input {
     A1,
     B1,
     C1,
@@ -15,7 +15,7 @@ pub enum Input {
 }
 
 // Parse the turn menu input form the provided input string.
-pub fn parse_input(input: &str) -> Result<Input, &'static str> {
+fn parse_input(input: &str) -> Result<Input, &'static str> {
     match input.trim() {
         "A1" => Ok(Input::A1),
         "B1" => Ok(Input::B1),
@@ -47,7 +47,7 @@ fn input_index(input: &Input) -> usize {
 
 // An enumeration for all available slot types.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Slot {
+enum Slot {
     Empty,
     X,
     O,
@@ -63,7 +63,7 @@ fn slot_char(slot: Slot) -> char {
 }
 
 // A type for the game grid containing 3x3 slots.
-pub type Grid = [Slot; 9];
+type Grid = [Slot; 9];
 
 // Build a new grid where the slot in the target index has been updated.
 fn update_grid(grid: &Grid, input: &Input, slot: Slot) -> Grid {
@@ -107,7 +107,7 @@ fn grid_string(grid: &Grid) -> String {
 
 // An enumeration for all available player types.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Player {
+enum Player {
     X,
     O,
 }
@@ -129,23 +129,23 @@ fn player_slot(player: &Player) -> Slot {
 }
 
 // Handle the provided input to react on user input.
-pub fn handle_input(input: &Input, grid: &Grid, player: &Player) -> Command {
+fn handle_input(input: &Input, grid: &Grid, player: &Player) -> SubCommand {
     if grid[input_index(input)] == Slot::Empty {
         let new_grid = update_grid(grid, input, player_slot(player));
         if has_win(&new_grid) {
-            Command::Victory(new_grid, *player)
+            SubCommand::Victory(new_grid, *player)
         } else if has_free(&new_grid) {
-            Command::TurnMenu(new_grid, opposite_player(*player))
+            SubCommand::Play(new_grid, opposite_player(*player))
         } else {
-            Command::Draw(new_grid)
+            SubCommand::Draw(new_grid)
         }
     } else {
-        Command::TurnMenu(*grid, *player)
+        SubCommand::Play(*grid, *player)
     }
 }
 
 // Get the string representation of the turn menu.
-pub fn turn_menu_string(grid: &Grid, player: &Player) -> String {
+fn turn_menu_string(grid: &Grid, player: &Player) -> String {
     let mut result = String::new();
     result += format!("Current turn: {:?}\n\n", player).as_str();
     result += grid_string(grid).as_str();
@@ -155,7 +155,7 @@ pub fn turn_menu_string(grid: &Grid, player: &Player) -> String {
 }
 
 // Get the string representation of the game victory.
-pub fn victory_string(grid: &Grid, player: &Player) -> String {
+fn victory_string(grid: &Grid, player: &Player) -> String {
     let mut result = String::new();
     result += grid_string(grid).as_str();
     result += "\n\n";
@@ -164,12 +164,41 @@ pub fn victory_string(grid: &Grid, player: &Player) -> String {
 }
 
 // Get the string representation of the game draw.
-pub fn draw_string(grid: &Grid) -> String {
+fn draw_string(grid: &Grid) -> String {
     let mut result = String::new();
     result += grid_string(grid).as_str();
     result += "\n\n";
     result += "Game ends in a draw! Better luck next time!";
     result
+}
+
+enum SubCommand {
+    Play(Grid, Player),
+    Victory(Grid, Player),
+    Draw(Grid),
+}
+
+pub fn run(output: fn(&str), input: fn() -> String) -> Command {
+    let mut command = SubCommand::Play([Slot::Empty; 9], Player::O);
+    loop {
+        match command {
+            SubCommand::Play(grid, player) => {
+                output(turn_menu_string(&grid, &player).as_str());
+                command = parse_input(input().trim()).map_or_else(
+                    |_| SubCommand::Play(grid, player),
+                    |x| handle_input(&x, &grid, &player),
+                );
+            }
+            SubCommand::Victory(grid, player) => {
+                output(victory_string(&grid, &player).as_str());
+                return Command::Exit;
+            }
+            SubCommand::Draw(grid) => {
+                output(draw_string(&grid).as_str());
+                return Command::Exit;
+            }
+        }
+    }
 }
 
 #[cfg(test)]

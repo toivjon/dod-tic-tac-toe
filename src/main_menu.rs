@@ -1,7 +1,7 @@
 use crate::Command;
 
 // A heading use to visualize the main menu.
-pub const HEADING: &str = "
+const HEADING: &str = "
 ===================
 === Tic-Tac-Toe ===
 ===================
@@ -13,13 +13,13 @@ Please enter a selection:
 
 // An enumeration of the main menu inputs.
 #[derive(Debug, PartialEq)]
-pub enum Input {
+enum Input {
     Play,
     Exit,
 }
 
 // Parse the main menu input from the provided input string.
-pub fn parse_input(input: &str) -> Result<Input, &'static str> {
+fn parse_input(input: &str) -> Result<Input, &'static str> {
     match input {
         "1" => Ok(Input::Play),
         "2" => Ok(Input::Exit),
@@ -28,11 +28,16 @@ pub fn parse_input(input: &str) -> Result<Input, &'static str> {
 }
 
 // Handle the provided input to react on user input.
-pub fn handle_input(input: Input) -> Command {
+fn handle_input(input: Input) -> Command {
     match input {
         Input::Play => Command::OpenTurnMenu,
         Input::Exit => Command::Exit,
     }
+}
+
+pub fn run(output: fn(&str), input: fn() -> String) -> Command {
+    output(HEADING);
+    parse_input(input().trim()).map_or_else(|_| Command::MainMenu, |x| handle_input(x))
 }
 
 #[cfg(test)]
