@@ -38,7 +38,7 @@ fn handle_input(input: Input) -> Command {
 // Run the main menu by rendering output and reacting on user input.
 pub fn run(output: fn(&str), input: fn() -> String) -> Command {
     output(HEADING);
-    parse_input(input().trim()).map_or_else(|_| Command::OpenMainMenu, |x| handle_input(x))
+    parse_input(input().trim()).map_or_else(|_| Command::OpenMainMenu, handle_input)
 }
 
 #[cfg(test)]
