@@ -10,7 +10,7 @@ pub enum Command {
 }
 
 // Run the game with the provided input and output channels.
-pub fn run(output: fn(&str), input: fn() -> String) {
+pub fn run(output: &impl Fn(&str), input: &impl Fn() -> String) {
     let mut command = Command::OpenMainMenu;
     loop {
         match command {

@@ -179,7 +179,7 @@ enum SubCommand {
 }
 
 // Run the turn menu by rendering output and reacting on user input.
-pub fn run(output: fn(&str), input: fn() -> String) -> Command {
+pub fn run(output: &impl Fn(&str), input: &impl Fn() -> String) -> Command {
     let mut command = SubCommand::Play([Slot::Empty; 9], Player::O);
     loop {
         match command {
