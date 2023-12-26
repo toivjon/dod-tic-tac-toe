@@ -61,5 +61,4 @@ mod tests {
         assert_eq!(handle_input(Input::Play), Command::OpenTurnMenu);
         assert_eq!(handle_input(Input::Exit), Command::Exit);
     }
-    
 }

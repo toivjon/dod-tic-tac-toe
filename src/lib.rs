@@ -25,26 +25,26 @@ fn execute_command(command: &Command, output: fn(&str), input: fn() -> String) -
     match command {
         Command::MainMenu => {
             output(main_menu::HEADING);
-            let input = main_menu::parse_input(input().trim()).unwrap(); // TODO get rid of unwrap
-            Option::Some(main_menu::handle_input(input))
+            main_menu::parse_input(input().trim()).map_or_else(
+                |_| Some(Command::MainMenu),
+                |x| Some(main_menu::handle_input(x)),
+            )
         }
         Command::OpenTurnMenu => {
             let grid = [turn_menu::Slot::Empty; 9];
             let player = turn_menu::Player::O;
             output(turn_menu::turn_menu_string(&grid, &player).as_str());
-            Option::Some(turn_menu::handle_input(
-                &turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
-                &grid,
-                &player,
-            ))
+            turn_menu::parse_input(input().trim()).map_or_else(
+                |_| Some(Command::OpenTurnMenu),
+                |x| Some(turn_menu::handle_input(&x, &grid, &player)),
+            )
         }
         Command::TurnMenu(grid, player) => {
             output(turn_menu::turn_menu_string(grid, player).as_str());
-            Option::Some(turn_menu::handle_input(
-                &turn_menu::parse_input(input().trim()).unwrap(), // TODO get rid of unwrap
-                grid,
-                player,
-            ))
+            turn_menu::parse_input(input().trim()).map_or_else(
+                |_| Some(Command::TurnMenu(*grid, *player)),
+                |x| Some(turn_menu::handle_input(&x, &grid, &player)),
+            )
         }
         Command::Victory(grid, player) => {
             output(turn_menu::victory_string(grid, player).as_str());
